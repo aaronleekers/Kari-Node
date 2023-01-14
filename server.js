@@ -1,27 +1,15 @@
 const express = require('express');
-const { spawn } = require('child_process');
 const app = express();
-const port = 3000;
 
-app.post('/search', (req, res) => {
-    const query = req.body.query;
-    const searchApi = spawn('node', ['search_api.js', query]);
+ 
 
-    searchApi.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-    });
+app.get('/processData', (req, res) => {
+    const query = req.query.query
+    const result = processData(query);
+    res.send(result)
+  })
 
-    searchApi.stderr.on('data', (data) => {
-        console.log(`stderr: ${data}`);
-    });
 
-    searchApi.on('close', (code) => {
-        console.log(`child process exited with code ${code}`);
-    });
-
-    res.send('Search query submitted');
-});
-
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server running on port ${process.env.PORT}`);
 });

@@ -9,7 +9,7 @@ const eodApi = "63a2477acc2587.58203009"
   });
   const openai = new OpenAIApi(configuration);
 
-async function api_search() {    
+async function processData() {    
     const isDataValid = await validateData(query);
         if (isDataValid === 'y'){
             const quantifiedRequestType = await quantifyRequestType(query);
