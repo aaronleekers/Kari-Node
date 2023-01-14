@@ -2,7 +2,11 @@ const express = require('express');
 const app = express();
 require('dotenv');
 
- 
+app.get('/', (req, res) => {
+    res.send('Hello, World!');
+  });
+
+
 
 app.get('/processData', (req, res) => {
     const query = req.query.query
@@ -11,6 +15,6 @@ app.get('/processData', (req, res) => {
   })
 
 
-app.listen(process.env.PORT || 3000, () => {
+app.listen( 3000, () => {
     console.log(`Server running on port ${process.env.PORT}`);
 });
