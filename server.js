@@ -1,20 +1,13 @@
 const express = require('express');
 const app = express();
-require('dotenv');
+import { api_search } from 'Kari-Node/api.js'
 
 app.get('/', (req, res) => {
     res.send('Hello, World!');
   });
 
+app.use(express.json());
+app.use("/request", api_search)
 
-
-app.get('/processData', (req, res) => {
-    const query = req.query.query
-    const result = processData(query);
-    res.send(result)
-  })
-
-
-app.listen( 3000, () => {
-    console.log(`Server running on port ${process.env.PORT}`);
-});
+const port = 80
+app.listen(port, () => console.log("Server is running on port 80"));
