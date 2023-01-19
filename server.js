@@ -3,6 +3,8 @@ const url = require('url');
 const querystring = require('querystring');
 const { Configuration, OpenAIApi } = require('openai');
 const { create } = require('domain');
+const cors = require('cors');
+
 
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
@@ -14,6 +16,10 @@ const eodApi = "63a2477acc2587.58203009"
     apiKey: apiKey,
   });
   const openai = new OpenAIApi(configuration);
+
+  app.use(cors({
+    origin: 'https://www.chat.openai.com'
+}));
 
   function setCorsHeaders(res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
