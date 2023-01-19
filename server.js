@@ -114,20 +114,24 @@ async function extractInfo(queryString) {
 
 // modified formatToApiLinkConstructors function that will work in one step to take in the extractInfo and the request type and construct a whole link.
 async function createApiLink(extractedInfoByRequest, quantifiedRequestType) {
-  const response = await openai.createCompletion({
+  const firstResponse = await openai.createCompletion({
     model: "text-davinci-003",
     prompt: `Follow this workflow.
              1.Take the extractedInfo data that is being passed in and apply api link formatting to them. Here are potential formattings: {extractedStockTicker}.us?, &from={fromDate}, &to={toDate}.
-             2.Take the reformatted extractedInfo data, processed in step 1, and construct an API link. Follow this formatting. If there are other points, add them to the link. https://www.eodhistoricaldata.com/api/${quantifiedRequestType}/{reformattedStockName}api_token=63a2477acc2587.58203009
+             2.Take the reformatted extractedInfo data, processed in step 1, and construct an API link. Follow this formatting. If there are other points, add them to the link. https://www.eodhistoricaldata.com/api/${quantifiedRequestType}/{reformattedStockName}api_token=63a2477acc2587.58203009{fromDate, if applicable}{toDate, if applicable}
              3. At the end of the link add in &fmt=json
-             4. Return the constructed apilink only. No other words except the link.
+             4. Make sure it's in the correct order: Stockname, api_key, fromDate, toDate, &fmt=json.
+             5. Return the constructed apilink. Do not preface it with "Answer:" that shit is annoying.
              Here is the extracted info to modify:${extractedInfoByRequest}.`,
     max_tokens: 3000,
     temperature: .5,
     stop: "/n",
   });
- return response.data.choices[0].text;
+ return firstResponse.data.choices[0].text;
 }
+
+
+
 
 async function apiCall(apiLink) {
   const response = await fetch(apiLink);
@@ -138,7 +142,7 @@ async function summarizeData(apiCallData, queryString) {
   const apiCallDataString = JSON.stringify(apiCallData)
   const response = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: `Craft a response based on this.
+      prompt: `Craft a response based on this Make it quick and direct Only give analysis of the data based on the question about it, so if they are asking for a specific point, that means you should only pair it with that point. If it is more of a general question, provide general analysis.. 
               Data: ${apiCallDataString} 
               Question: ${queryString}
               Response:`,
