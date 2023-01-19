@@ -29,7 +29,7 @@ const server = http.createServer((req, res) => {
     }
 });
 
-function handleRequest(req, res) {
+async function handleRequest(req, res) {
     if (req.method === 'POST' && req.url === '/api_search') {
         setCorsHeaders(res);
         let body = '';
