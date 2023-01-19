@@ -57,8 +57,6 @@ server.listen(3000, '0.0.0.0', () => {
   console.log('Server running at http://0.0.0.0:3000');
 });
 
-
-
 async function api_search(queryString, callback) {
   console.log("api_search called with queryString:", queryString);
   const isDataValid = await validateData(queryString);
@@ -74,7 +72,7 @@ async function api_search(queryString, callback) {
   console.log("apiCall returned:", apiCallData);
   const summarizedData = await summarizeData(apiCallData);
   console.log("summarizeData returned:", summarizedData);
-return summarizedData;
+  callback(summarizedData);
 }
 
 async function validateData(queryString) {
