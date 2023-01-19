@@ -15,42 +15,47 @@ const eodApi = "63a2477acc2587.58203009"
   });
   const openai = new OpenAIApi(configuration);
 
-  
+  function setCorsHeaders(res) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+}
 
-  const server = http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
     //Handle CORS preflight request
     if(req.method === 'OPTIONS') {
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        setCorsHeaders(res);
+        res.end();
+    } else {
+        handleRequest(req, res);
+    }
+});
+
+function handleRequest(req, res) {
+    if (req.method === 'POST' && req.url === '/api_search') {
+        let body = '';
+        req.on('data', (chunk) => {
+        body += chunk.toString();
+        });
+        req.on('end', () => {
+        const queryString = JSON.stringify(querystring.parse(body));
+        api_search(queryString, (output) => {
+            setCorsHeaders(res);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ output }));
+        });
+        });
+    } else if (req.url === '/') {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('Hello, World!');
+    } else {
+        res.writeHead(404);
         res.end();
     }
-    else if (req.method === 'POST' && req.url === '/api_search') {
-      let body = '';
-      req.on('data', (chunk) => {
-      body += chunk.toString();
-      });
-      req.on('end', () => {
-      const queryString = JSON.stringify(querystring.parse(body));
-      api_search(queryString, (output) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ output }));
-      });
-      });
-      } else if (req.url === '/') {
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      res.end('Hello, World!');
-      } else {
-      res.writeHead(404);
-      res.end();
-      }
-});
+}
 
 server.listen(3000, '0.0.0.0', () => {
   console.log('Server running at http://0.0.0.0:3000');
 });
-
 
 
 
