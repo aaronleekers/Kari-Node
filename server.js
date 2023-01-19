@@ -15,6 +15,8 @@ const eodApi = "63a2477acc2587.58203009"
   });
   const openai = new OpenAIApi(configuration);
 
+  
+
   const server = http.createServer((req, res) => {
     //Handle CORS preflight request
     if(req.method === 'OPTIONS') {
@@ -46,8 +48,9 @@ const eodApi = "63a2477acc2587.58203009"
 });
 
 server.listen(3000, '0.0.0.0', () => {
-    console.log('Server running at http://0.0.0.0:3000');
+  console.log('Server running at http://0.0.0.0:3000');
 });
+
 
 
 
