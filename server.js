@@ -103,7 +103,7 @@ async function qualifyRequestType(queryString) {
       Option 7 (macro-indicators): If the user is asking for any indicators that would give insights about macroeconomic trends, such as CPI or other macroeconomic datapoints.
       Option 8 (fundamentals-crypto): Fundamentals for a cryptocurrency. if the user is asking for info on a cryptocurrency or uses the word crypto or cryptocurrency, choose this category.
       Option 9 (exchanges-list): If user appears to want to view all the stock tickers or view a list of exchanges, choose this.
-      Output: Respond with the item in the parenthesis next to the options alone to select an option.
+      Output: Respond only with item in parenthesis. Remove parenthesis and respond only with item. For example: real-time 
       `,
       max_tokens: 3000,
       temperature: .5,
@@ -179,6 +179,7 @@ async function intradayRequest(queryString){
 async function realTimeRequest(queryString){
 // workflow Function
 var extractedInfo = await extractInfo(queryString);
+console.log("")
 var apiLink = await createApiLink(extractedInfo);
 var apiCallData = await apiCall(apiLink);
 var summarizedData = await summarizeData(apiCallData);
