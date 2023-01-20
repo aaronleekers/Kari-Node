@@ -204,7 +204,7 @@ async function extractInfo(queryString) {
     return extractedInfo.data.choices[0].text;
 }
 // createApiLink function
-async function createApiLink(extractedInfo, quantifiedRequestType) {
+async function createApiLink(extractedInfo) {
     const apiLink = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
