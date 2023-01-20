@@ -78,6 +78,7 @@ async function api_search(queryString, callback) {
   console.log("api_search called with queryString:", queryString);
   const requestType = await qualifyRequestType(queryString);
   console.log("Request Type:",requestType);
+  console.log(typeof requestType);
   if (requestFunctions[requestType]) {
     const requestOutput = await requestFunctions[requestType](queryString);
     console.log("Request Output:", requestOutput);
