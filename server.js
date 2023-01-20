@@ -80,8 +80,8 @@ async function api_search(queryString, callback) {
   const requestType = await qualifyRequestType(queryString);
   console.log("Request Type:",requestType);
   console.log(typeof requestType);
-  if (requestFunctions[parseInt(requestType)]) {
-    const requestOutput = await requestFunctions[requestType](queryString);
+  if (requestFunctions[requestType]) {
+    const requestOutput = requestFunctions[requestType](queryString);
     console.log("Request Output:", requestOutput);
     callback(requestOutput);
   } else {
