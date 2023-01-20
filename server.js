@@ -17,12 +17,10 @@ const apiKey = "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"
   const allowedOrigin = 'https://chat.openai.com';
 
   async function setCorsHeaders(req, res) {
-      const origin = req.headers.origin;
-      if (origin === allowedOrigin) {
-          res.setHeader("Access-Control-Allow-Origin", origin);
+          req.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+          res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       }
-      res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  }
+  
   
 
 const server = http.createServer((req, res) => {
