@@ -63,15 +63,15 @@ server.listen(3000, '0.0.0.0', () => {
 });
 
 const requestFunctions = {
-  "intraday": intradayRequest,
-  "fundamentals-stock": fundamentalsStockRequest,
-  "real-time": realTimeRequest,
-  "calendar/earnings": earningsRequest,
-  "eod-bulk-last-day": bulkRequest,
-  "search": searchRequest,
-  "macro-indicators": macroRequest,
-  "fundamentals-crypto": fundamentalsCryptoRequest,
-  "exchanges-list": exchangesListRequest
+  "1": intradayRequest,
+  "2": fundamentalsStockRequest,
+  "3": realTimeRequest,
+  "4": earningsRequest,
+  "5": bulkRequest,
+  "6": searchRequest,
+  "7": macroRequest,
+  "8": fundamentalsCryptoRequest,
+  "9": exchangesListRequest
 }
 
 async function api_search(queryString, callback) {
