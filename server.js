@@ -14,15 +14,21 @@ const apiKey = "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"
   });
   const openai = new OpenAIApi(configuration);
 
-async function setCorsHeaders(res) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-}
+  const allowedOrigin = 'https://chat.openai.com';
+
+  async function setCorsHeaders(req, res) {
+      const origin = req.headers.origin;
+      if (origin === allowedOrigin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+      }
+      res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  }
+  
 
 const server = http.createServer((req, res) => {
     //Handle CORS preflight request
     if(req.method === 'OPTIONS') {
-      setCorsHeaders(res);
+      setCorsHeaders(req, res);
       res.end();
     } else {
         handleRequest(req, res);
@@ -31,7 +37,7 @@ const server = http.createServer((req, res) => {
 
 async function handleRequest(req, res) {
     if (req.method === 'POST' && req.url === '/api_search') {
-        setCorsHeaders(res);
+        setCorsHeaders(req, res);
         let body = '';
         req.on('data', (chunk) => {
         body += chunk.toString();
@@ -39,7 +45,6 @@ async function handleRequest(req, res) {
         req.on('end', () => {
         const queryString = JSON.stringify(querystring.parse(body));
         api_search(queryString, (output) => {
-            setCorsHeaders(res);
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ output }));
         });
