@@ -63,15 +63,15 @@ server.listen(3000, '0.0.0.0', () => {
 });
 
 const requestFunctions = {
-  "1": intradayRequest,
-  "2": fundamentalsStockRequest,
-  "3": realTimeRequest,
-  "4": earningsRequest,
-  "5": bulkRequest,
-  "6": searchRequest,
-  "7": macroRequest,
-  "8": fundamentalsCryptoRequest,
-  "9": exchangesListRequest
+  1: intradayRequest,
+  2: fundamentalsStockRequest,
+  3: realTimeRequest,
+  4: earningsRequest,
+  5: bulkRequest,
+  6: searchRequest,
+  7: macroRequest,
+  8: fundamentalsCryptoRequest,
+  9: exchangesListRequest
 }
 
 async function api_search(queryString, callback) {
