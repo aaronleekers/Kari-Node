@@ -316,7 +316,5 @@ async function exchangesListRequest(queryString){
 }
 
 
-a
-
 
 
