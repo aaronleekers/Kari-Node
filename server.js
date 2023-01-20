@@ -57,13 +57,29 @@ server.listen(3000, '0.0.0.0', () => {
   console.log('Server running at http://0.0.0.0:3000');
 });
 
+const requestFunctions = {
+  "intraday": intradayRequest,
+  "fundamentals-stock": fundamentalsStockRequest,
+  "real-time": realTimeRequest,
+  "calendar/earnings": earningsRequest,
+  "eod-bulk-last-day": bulkRequest,
+  "search": searchRequest,
+  "macro-indicators": macroRequest,
+  "fundamentals-crypto": fundamentalsCryptoRequest,
+  "exchanges-list": exchangesListRequest
+}
+
 async function api_search(queryString, callback) {
   console.log("api_search called with queryString:", queryString);
   const requestType = await qualifyRequestType(queryString);
   console.log("Request Type:",requestType);
-  const requestOutput = await fulfillRequest(queryString, requestType);
-  console.log("Request Output:", requestOutput);
-  callback(requestOutput);
+  if (requestFunctions[requestType]) {
+    const requestOutput = await requestFunctions[requestType](queryString);
+    console.log("Request Output:", requestOutput);
+    callback(requestOutput);
+  } else {
+    console.log("Invalid request type:", requestType);
+  }
 }
 
 async function qualifyRequestType(queryString) {
@@ -90,118 +106,212 @@ async function qualifyRequestType(queryString) {
   });
   return response.data.choices[0].text;
 } 
-
-async function fulfillRequest(queryString, requestType) {
-  switch (requestType) {
-      case "intraday":
-          // workflow Function
-          var extractedInfo = await extractInfo(queryString);
-          var apiLink = await createApiLink(extractedInfo);
-          var apiCallData = await apiCall(apiLink);
-          var summarizedData = await summarizeData(apiCallData);
-          console.log(`Data Returned: ${summarizedData}`);
-          // extractInfo function
-          async function extractInfo(queryString) {
-              const extractedInfo = await openai.createCompletion({
-                  model: "text-davinci-003",
-                  prompt: `
-                  Extract the datapoints in this query. 
-                  Respond in this format: 
-                  stockName: extractedStockTicker, 
-                  fromDate: fromDate, (mm-dd-yyyy)
-                  toDate: toDate (mm-dd-yyyy)
-                  interval: interval. (can only be 1m, 5m, or 1h)
-                  Defaults if N/A: fromDate: 01/01/2023 toDate: 01/19/2023 interval: 1h
-                  Query: ${queryString}`,
-                  max_tokens: 3000,
-                  temperature: .5,
-                  stop: "/n",
-              });
-              return extractedInfo.data.choices[0].text;
-          }
-          // createApiLink function
-          async function createApiLink(extractedInfo, quantifiedRequestType) {
-              const apiLink = await openai.createCompletion({
-                  model: "text-davinci-003",
-                  prompt: `
-                  Follow this workflow:
-                  CONVERT DATES TO UNIX TIMESTAMPS.
-                  Instructions. Replace the variables in this link with the variables that were passed and return the link alone.
-                  Link: https://www.eodhistoricaldata.com/api/${quantifiedRequestType}/{stockName}.US?api_token=63a2477acc2587.58203009&from=fromDate&to=toDate&interval=interval&fmt=json
-                  Variables: ${extractedInfo}`,
-                  max_tokens: 3000,
-                  temperature: .5,
-                  stop: "/n",
-              });
-              return apiLink.data.choices[0].text;
-          }
-          // apiCall function
-          async function apiCall(apiLink) {
-              const response = await fetch(apiLink);
-              return response.json();
-          }
-          // summarizeData function
-          async function summarizeData(apiCallData, queryString) {
-              const apiCallDataString = json.stringify(apiCallData)
-              const response = await openai.createCompletion({
-                  model: "text-davinci-003",
-                  prompt: `
-                  Craft a brief response and summary of this data. 
-                  Convert values to be tailored towards a retail investor.
-                  Data: ${apiCallDataString}
-                  Question: ${queryString}
-                  Response:`,
-                  max_tokens: 3000,
-                  temperature: .5,
-                  stop: "/n",
-              })
-              return response.data.choices[0].text
-          }
-          break;
-      case "fundamentals-stock":
-          break;
-      case "real-time":
-          // extractInfo function
-          // createApiLink function
-          // apiCall function
-          // summarizeData function
-          break;
-      case "calendar/earnings":
-          // extractInfo function
-          // createApiLink function
-          // apiCall function
-          // summarizeData function
-          break;
-      case "eod-bulk-last-day":
-          // extractInfo function
-          // createApiLink function
-          // apiCall function
-          // summarizeData function
-          break;
-      case "search":
-          // extractInfo function
-          // createApiLink function
-          // apiCall function
-          // summarizeData function      
-          break;
-      case "macro-indicators":
-          // extractInfo function
-          // createApiLink function
-          // apiCall function
-          // summarizeData function            
-          break;
-      case "fundamentals-crypto":
-          // extractInfo function
-          // createApiLink function
-          // apiCall function
-          // summarizeData function            
-          break;
-      case "exchanges-list":
-          // extractInfo function
-          // createApiLink function
-          // apiCall function
-          // summarizeData function 
-          break;
-  }
+async function intradayRequest(queryString){
+   // workflow Function
+   var extractedInfo = await extractInfo(queryString);
+   var apiLink = await createApiLink(extractedInfo);
+   var apiCallData = await apiCall(apiLink);
+   var summarizedData = await summarizeData(apiCallData);
+   console.log(`Data Returned: ${summarizedData}`);
+   // extractInfo function
+   async function extractInfo(queryString) {
+       const extractedInfo = await openai.createCompletion({
+           model: "text-davinci-003",
+           prompt: `
+           Extract the datapoints in this query. 
+           Respond in this format: 
+           stockName: extractedStockTicker, 
+           fromDate: fromDate, (YYYY-MM-DD)
+           toDate: toDate (YYYY-MM-DD)
+           interval: interval. (can only be 1m, 5m, or 1h)
+           Defaults if N/A: fromDate: 01/01/2023 toDate: 01/19/2023 interval: 1h
+           Query: ${queryString}`,
+           max_tokens: 3000,
+           temperature: .5,
+           stop: "/n",
+       });
+       return extractedInfo.data.choices[0].text;
+   }
+   // createApiLink function
+   async function createApiLink(extractedInfo, quantifiedRequestType) {
+       const apiLink = await openai.createCompletion({
+           model: "text-davinci-003",
+           prompt: `
+           Follow this workflow:
+           CONVERT DATES TO YYYY-MM-DD.
+           Instructions. Replace the variables in this link with the variables that were passed and return the link alone.
+           Link: https://www.eodhistoricaldata.com/api/intraday/{stockName}.US?api_token=63a2477acc2587.58203009&from=fromDate&to=toDate&interval=interval&fmt=json
+           Variables: ${extractedInfo}`,
+           max_tokens: 3000,
+           temperature: .5,
+           stop: "/n",
+       });
+       return apiLink.data.choices[0].text;
+   }
+   // apiCall function
+   async function apiCall(apiLink) {
+       const response = await fetch(apiLink);
+       return response.json();
+   }
+   // summarizeData function
+   async function summarizeData(apiCallData, queryString) {
+       const apiCallDataString = json.stringify(apiCallData)
+       const response = await openai.createCompletion({
+           model: "text-davinci-003",
+           prompt: `
+           Craft a brief response and summary of this data. 
+           Convert values to be tailored towards a retail investor.
+           Data: ${apiCallDataString}
+           Question: ${queryString}
+           Response:`,
+           max_tokens: 3000,
+           temperature: .5,
+           stop: "/n",
+       })
+       return response.data.choices[0].text
+   }
 }
+async function realTimeRequest(queryString){
+// workflow Function
+var extractedInfo = await extractInfo(queryString);
+var apiLink = await createApiLink(extractedInfo);
+var apiCallData = await apiCall(apiLink);
+var summarizedData = await summarizeData(apiCallData);
+console.log(`Data Returned: ${summarizedData}`);
+// extractInfo function
+async function extractInfo(queryString) {
+    const extractedInfo = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Extract the datapoints in this query. 
+        Respond in this format: 
+        stockName: extractedStockTicker, 
+        Defaults if N/A: stockName: AAPL
+        Query: ${queryString}`,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    });
+    return extractedInfo.data.choices[0].text;
+}
+// createApiLink function
+async function createApiLink(extractedInfo, quantifiedRequestType) {
+    const apiLink = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Follow this workflow:
+        Instructions. Replace the variables in this link with the variables that were passed and return the link alone.
+        Link: https://www.eodhistoricaldata.com/api/real-time/{stockName}.US?api_token=63a2477acc2587.58203009&fmt=json
+        Variables: ${extractedInfo}`,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    });
+    return apiLink.data.choices[0].text;
+}
+// apiCall function
+async function apiCall(apiLink) {
+    const response = await fetch(apiLink);
+    return response.json();
+}
+// summarizeData function
+async function summarizeData(apiCallData, queryString) {
+    const apiCallDataString = json.stringify(apiCallData)
+    const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Craft a brief response and summary of this data. 
+        Convert values to be tailored towards a retail investor.
+        Data: ${apiCallDataString}
+        Question: ${queryString}
+        Response:`,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    })
+    return response.data.choices[0].text
+}
+}
+async function earningsRequest(queryString){
+  // workflow Function
+var extractedInfo = await extractInfo(queryString);
+var apiLink = await createApiLink(extractedInfo);
+var apiCallData = await apiCall(apiLink);
+var summarizedData = await summarizeData(apiCallData);
+console.log(`Data Returned: ${summarizedData}`);
+// extractInfo function
+async function extractInfo(queryString) {
+    const extractedInfo = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Extract the datapoints in this query. 
+        Respond in this format: 
+        stockName: extractedStockTicker,
+        fromDate: fromDate,
+        toDate: toDate, 
+        Defaults if N/A: stockName: AAPL
+        Query: ${queryString}`,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    });
+    return extractedInfo.data.choices[0].text;
+}
+// createApiLink function
+async function createApiLink(extractedInfo) {
+    const apiLink = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Follow this workflow:
+        CONVERT DATES TO YYYY-MM-DD.
+        Instructions. Replace the variables in this link with the variables that were passed and return the link alone.
+        Link: https://www.eodhistoricaldata.com/api/calendar/earnings?api_token=63a2477acc2587.58203009&fmt=json&from=fromDate&to=toDate
+        Variables: ${extractedInfo}`,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    });
+    return apiLink.data.choices[0].text;
+}
+// apiCall function
+async function apiCall(apiLink) {
+    const response = await fetch(apiLink);
+    return response.json();
+}
+// summarizeData function
+async function summarizeData(apiCallData, queryString) {
+    const apiCallDataString = json.stringify(apiCallData)
+    const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Craft a brief response and summary of this data. 
+        Convert values to be tailored towards a retail investor.
+        Data: ${apiCallDataString}
+        Question: ${queryString}
+        Response:`,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    })
+    return response.data.choices[0].text
+}
+}
+async function fundamentalsStockRequest(queryString){
+}
+
+async function bulkRequest(queryString){
+}
+async function searchRequest(queryString){
+}
+async function macroRequest(queryString){
+}
+async function fundamentalsCryptoRequest(queryString){
+}
+async function exchangesListRequest(queryString){
+}
+
+
+a
+
+
 
