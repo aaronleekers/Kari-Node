@@ -17,10 +17,12 @@ const apiKey = "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"
   const allowedOrigin = 'https://chat.openai.com';
 
   async function setCorsHeaders(req, res) {
-          req.setHeader("Access-Control-Allow-Origin", allowedOrigin);
-          res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      const origin = req.headers.origin;
+      if (origin === allowedOrigin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
       }
-  
+      res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  }
   
 
 const server = http.createServer((req, res) => {
@@ -29,13 +31,13 @@ const server = http.createServer((req, res) => {
       setCorsHeaders(req, res);
       res.end();
     } else {
+        setCorsHeaders(req, res);
         handleRequest(req, res);
     }
 });
 
 async function handleRequest(req, res) {
     if (req.method === 'POST' && req.url === '/api_search') {
-        setCorsHeaders(req, res);
         let body = '';
         req.on('data', (chunk) => {
         body += chunk.toString();
@@ -312,6 +314,8 @@ async function fundamentalsCryptoRequest(queryString){
 }
 async function exchangesListRequest(queryString){
 }
+
+
 
 
 
