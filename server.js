@@ -1,19 +1,19 @@
-const http = require('http');
-const url = require('url');
 const querystring = require('querystring');
 const { Configuration, OpenAIApi } = require('openai');
-const { create } = require('domain');
+const { query } = require('express');
+const http = require('http');
+
 
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
 
-  // openAI auth
-  const configuration = new Configuration({
+// openAI auth
+const configuration = new Configuration({
     orgId: orgId,
     apiKey: apiKey,
   });
-  const openai = new OpenAIApi(configuration);
-
+  
+const openai = new OpenAIApi(configuration);
 async function setCorsHeaders(res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -58,104 +58,150 @@ server.listen(3000, '0.0.0.0', () => {
 });
 
 async function api_search(queryString, callback) {
-  console.log("api_search called with queryString:", queryString);
-  const isDataValid = await validateData(queryString);
-  console.log("validateData returned:", isDataValid);
-  console.log("Data is indeed a financial question, quantifying request type.");
-  const quantifiedRequestType = await quantifyRequestType(queryString);
-  console.log("quantifyRequestType returned:", quantifiedRequestType);
-  const extractedInfoByRequest = await extractInfo(queryString, quantifiedRequestType);
-  console.log("extractInfo returned:", extractedInfoByRequest);
-  const apiLink = await createApiLink(extractedInfoByRequest, quantifiedRequestType);
-  console.log("constructApiLink returned:", apiLink);
-  const apiCallData = await apiCall(apiLink);
-  console.log("apiCall returned:", apiCallData);
-  const summarizedData = await summarizeData(apiCallData);
-  console.log("summarizeData returned:", summarizedData);
-  callback(summarizedData);
+    console.log("api_search called with queryString:", queryString);
+    const requestType = await qualifyRequestType(queryString);
+    console.log("Request Type:",requestType);
+    const requestOutput = await fulfillRequest(queryString, requestType);
+    console.log("Request Output:", requestOutput);
+    callback(requestOutput);
 }
 
-async function validateData(queryString) {
-  const response = await openai.createCompletion({
-      model: "text-ada-001",
-      prompt: `View this query, analyze it, determine the sentiment. Respond only with y or n depending on if the query is related to financial information. Here is the query: ${queryString}`,
-      max_tokens: 1500,
-      temperature: .5,
-      stop: "/n",
-  });
-  return response.data.choices[0].text;
+async function qualifyRequestType(queryString) {
+    const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Instructions: View this query, analyze the intent behind it, and select from a list of options that best reflects the user's intent based on the query.
+        Query: ${queryString}
+        Options:
+        Option 1 (intraday): Intraday Historical Prices over a range of time. If the user is asking for a list of prices over a range of time on a specific stock.
+        Option 2 (fundamentals-stock): Fundamentals for a stock. If user is using the word fundamentals, or wants to know specifics of an organization like financials of a specific quarter, that is found here.
+        Option 3 (real-time): For current prices of stocks at the moment they're asked about. If user uses word like "current price" it is likely asking for this category.
+        Option 4 (calendar/earnings): If the user uses the word earnings and gives a time range, it is likely wanting this category.
+        Option 5 (eod-bulk-last-day): If the user asks for all stocks in the market over the last day. If user is asking for insights based on the market movements without specifiying a specific stock or time range, it is likely this category.
+        Option 6 (search): If the user appears to be searching for specific stocks by name or is searching for possible stocks under a name. Basically choose this if they are looking for a specific list of stocks.
+        Option 7 (macro-indicators): If the user is asking for any indicators that would give insights about macroeconomic trends, such as CPI or other macroeconomic datapoints.
+        Option 8 (fundamentals-crypto): Fundamentals for a cryptocurrency. if the user is asking for info on a cryptocurrency or uses the word crypto or cryptocurrency, choose this category.
+        Option 9 (exchanges-list): If user appears to want to view all the stock tickers or view a list of exchanges, choose this.
+        Output: Respond with the item in the parenthesis next to the options alone to select an option.
+        `,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    });
+    return response.data.choices[0].text;
+} 
+
+async function fulfillRequest(queryString, requestType) {
+    switch (requestType) {
+        case "intraday":
+            // workflow Function
+            var extractedInfo = await extractInfo(queryString);
+            var apiLink = await createApiLink(extractedInfo);
+            var apiCallData = await apiCall(apiLink);
+            var summarizedData = await summarizeData(apiCallData);
+            console.log(`Data Returned: ${summarizedData}`);
+            // extractInfo function
+            async function extractInfo(queryString) {
+                const extractedInfo = await openai.createCompletion({
+                    model: "text-davinci-003",
+                    prompt: `
+                    Extract the datapoints in this query. 
+                    Respond in this format: 
+                    stockName: extractedStockTicker, 
+                    fromDate: fromDate, (mm-dd-yyyy)
+                    toDate: toDate (mm-dd-yyyy)
+                    interval: interval. (can only be 1m, 5m, or 1h)
+                    Defaults if N/A: fromDate: 01/01/2023 toDate: 01/19/2023 interval: 1h
+                    Query: ${queryString}`,
+                    max_tokens: 3000,
+                    temperature: .5,
+                    stop: "/n",
+                });
+                return extractedInfo.data.choices[0].text;
+            }
+            // createApiLink function
+            async function createApiLink(extractedInfo, quantifiedRequestType) {
+                const apiLink = await openai.createCompletion({
+                    model: "text-davinci-003",
+                    prompt: `
+                    Follow this workflow:
+                    CONVERT DATES TO UNIX TIMESTAMPS.
+                    Instructions. Replace the variables in this link with the variables that were passed and return the link alone.
+                    Link: https://www.eodhistoricaldata.com/api/${quantifiedRequestType}/{stockName}.US?api_token=63a2477acc2587.58203009&from=fromDate&to=toDate&interval=interval&fmt=json
+                    Variables: ${extractedInfo}`,
+                    max_tokens: 3000,
+                    temperature: .5,
+                    stop: "/n",
+                });
+                return apiLink.data.choices[0].text;
+            }
+            // apiCall function
+            async function apiCall(apiLink) {
+                const response = await fetch(apiLink);
+                return response.json();
+            }
+            // summarizeData function
+            async function summarizeData(apiCallData, queryString) {
+                const apiCallDataString = json.stringify(apiCallData)
+                const response = await openai.createCompletion({
+                    model: "text-davinci-003",
+                    prompt: `
+                    Craft a brief response and summary of this data. 
+                    Convert values to be tailored towards a retail investor.
+                    Data: ${apiCallDataString}
+                    Question: ${queryString}
+                    Response:`,
+                    max_tokens: 3000,
+                    temperature: .5,
+                    stop: "/n",
+                })
+                return response.data.choices[0].text
+            }
+            break;
+        case "fundamentals-stock":
+            break;
+        case "real-time":
+            // extractInfo function
+            // createApiLink function
+            // apiCall function
+            // summarizeData function
+            break;
+        case "calendar/earnings":
+            // extractInfo function
+            // createApiLink function
+            // apiCall function
+            // summarizeData function
+            break;
+        case "eod-bulk-last-day":
+            // extractInfo function
+            // createApiLink function
+            // apiCall function
+            // summarizeData function
+            break;
+        case "search":
+            // extractInfo function
+            // createApiLink function
+            // apiCall function
+            // summarizeData function      
+            break;
+        case "macro-indicators":
+            // extractInfo function
+            // createApiLink function
+            // apiCall function
+            // summarizeData function            
+            break;
+        case "fundamentals-crypto":
+            // extractInfo function
+            // createApiLink function
+            // apiCall function
+            // summarizeData function            
+            break;
+        case "exchanges-list":
+            // extractInfo function
+            // createApiLink function
+            // apiCall function
+            // summarizeData function 
+            break;
+    }
 }
 
-async function quantifyRequestType(queryString) {
-      const requestType = await openai.createCompletion({
-          model: "text-davinci-003",
-          prompt: `View the input, and then select from a list of options what the user is trying to do. 
-          RESPOND ONLY WITH THE TITLE OF THE OPTION IN THE PARENTHESIS. DO NOT ADD ANY OTHER COMMENTARY."${queryString}"
-          Option 1 (real-time). Getting current price of a specific stock?(if this, respond only with real-time)
-          Option 2 (fundamentals). Getting fundamentals of a cryptocurrency or stock(if this, respond only with fundamentals)
-          Option 3 (insider-transactions). Getting insider transactions(if this, respond only with insider-transactions)
-          Option 4 (calendar/earnings). Getting upcoming earnings of a stock(if this, respond only with calendar/earnings
-          Option 5 (calendar/ipos). Getting upcoming ipo filings, (if this, respond only with calendar/ipos))`,
-          max_tokens: 3000,
-          temperature: .5,
-          stop: "/n",
-      });
-      return requestType.data.choices[0].text; 
-}
-// modified extractInfo function that will work by running one call and extracting the info from it.
-async function extractInfo(queryString) {
-  const reformattedInput = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: `Extract the datapoints in this query. Respond in this format. If there is an N/A in any of the variables, don't include them in the response. (stockName: {extractedStockTicker}, fromDate: {fromDate}, toDate: {toDate}) 
-             Here are potential datapoints: 
-             Stock Ticker Name (formatted as ticker symbol alone)
-             from date(mm-dd-yyyy)
-             to date(mm-dd-yyyy).
-             Here is the query: ${queryString}`,
-             max_tokens: 3000,
-             temperature: .5,
-             stop: "/n",  
-  });
-  return reformattedInput.data.choices[0].text;
-}
-
-// modified formatToApiLinkConstructors function that will work in one step to take in the extractInfo and the request type and construct a whole link.
-async function createApiLink(extractedInfoByRequest, quantifiedRequestType) {
-  const firstResponse = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: `Follow this workflow.
-             1.Take the extractedInfo data that is being passed in and apply api link formatting to them. Here are potential formattings: {extractedStockTicker}.us?, &from={fromDate}, &to={toDate}.
-             2.Take the reformatted extractedInfo data, processed in step 1, and construct an API link. Follow this formatting. If there are other points, add them to the link. https://www.eodhistoricaldata.com/api/${quantifiedRequestType}/{reformattedStockName}api_token=63a2477acc2587.58203009{fromDate, if applicable}{toDate, if applicable}
-             3. At the end of the link add in &fmt=json
-             4. Make sure it's in the correct order: Stockname, api_key, fromDate, toDate, &fmt=json.
-             5. Return the constructed apilink. Do not preface it with "Answer:" that shit is annoying.
-             Here is the extracted info to modify:${extractedInfoByRequest}.`,
-    max_tokens: 3000,
-    temperature: .5,
-    stop: "/n",
-  });
- return firstResponse.data.choices[0].text;
-}
-
-
-
-
-async function apiCall(apiLink) {
-  const response = await fetch(apiLink);
-  return response.json();
-}
-
-async function summarizeData(apiCallData, queryString) {
-  const apiCallDataString = JSON.stringify(apiCallData)
-  const response = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: `Craft a response based on this Make it quick and direct Only give analysis of the data based on the question about it, so if they are asking for a specific point, that means you should only pair it with that point. If it is more of a general question, provide general analysis.. 
-              Data: ${apiCallDataString} 
-              Question: ${queryString}
-              Response:`,
-      max_tokens: 3000,
-      temperature: .5,
-      stop: "/n"
-  });
-  return response.data.choices[0].text;
-}
