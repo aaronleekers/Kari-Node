@@ -4,6 +4,7 @@ const url = require('url');
 const querystring = require('querystring');
 const { Configuration, OpenAIApi } = require('openai');
 const { create } = require('domain');
+const axios = require('axios');
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
 
@@ -165,19 +166,14 @@ async function api_search(queryString, callback) {
       return cleanedLink;
     }
     let cleanApiLink = cleanLink(apiLink);
-    https.get(cleanApiLink, (res) => {
-      let data = "";
-  
-      res.on("data", (chunk) => {
-        data += chunk;
-      });
-  
-      res.on("end", () => {
-        console.log(JSON.parse(data));
-      });
-    }).on("error", (err) => {
-      console.log("Error: " + err.message);
-    });
+
+  axios.get(cleanApiLink)
+  .then(response => {
+    console.log(response.data);
+  })
+  .catch(error => {
+    console.log(error);
+  });
   }
   
 
