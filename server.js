@@ -99,7 +99,7 @@ async function api_search(queryString) {
   console.log("Request Type:",intRequest);
   console.log(typeof intRequest);
   const requestOutput = await requestFunctions[intRequest](queryString);
-  return requestOutput;
+  console.log(requestOutput);
 }
 
 
@@ -117,6 +117,7 @@ async function api_search(queryString) {
     const apiCallData = await apiCall(apiLink);
     const summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
+    return summarizedData;
     // extractInfo function
     async function extractInfo(queryString) {
         const extractedInfo = await openai.createCompletion({
