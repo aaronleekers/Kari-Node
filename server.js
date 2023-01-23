@@ -149,7 +149,8 @@ async function api_search(queryString, callback) {
         Follow this workflow:
         1. Replace the variables in this link with the variables that were passed in.
         2. All variables passed in this link should be, stockName, fromDate, toDate, period. 
-        3. output will start with https://(rest of link)
+        3. Follow number 4 to start ouput.
+        4. https://
         https://www.eodhistoricaldata.com/api/eod/stockName.US?api_token=63a2477acc2587.58203009&fmt=json&from=fromDate&to=toDate&period=periodTime
         Variables: ${extractedInfo}`,
         max_tokens: 3000,
