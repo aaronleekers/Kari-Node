@@ -106,7 +106,7 @@ async function api_search(queryString) {
     // workflow Function
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
-    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m)
+    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
     console.log("stock & Time extracted!", extractedStock, extractedTimeRange); 
     var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
@@ -160,11 +160,12 @@ async function api_search(queryString) {
     const apiLink = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Please help me create a link to access financial data for a specific stock by replacing the stock name, from date, to date in the following format:
-        apiLink: https://www.eodhistoricaldata.com/api/eod/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json&from=(fromDate)&to=(toDate)&period=w
+        Please help me create a link to access financial data for a specific stock by replacing the stock name, from date, to date, and period in the following format:
+        apiLink: https://www.eodhistoricaldata.com/api/eod/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json&from=(fromDate)&to=(toDate)&period=(period)
         - The stock name (stockName) should be replaced with the variable ${extractedStock}.
         - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${extractedTimeRange}.
         - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
+        - The period should be determined by the length of the range. If the range is one year or longer, make it m. If it is 3 months or longer, make it w. if it is less, make it d.
         - Respond in the format of: "apiLink: (apilink)"
         - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT.
         `,
