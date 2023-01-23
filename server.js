@@ -101,7 +101,6 @@ async function api_search(queryString) {
   return requestOutput;
 }
 
-
 // all the possible requestType workflows
   // EOD Historical - Complete -  Not Tested
   async function eodRequest(queryString){
@@ -126,9 +125,9 @@ async function api_search(queryString) {
             Respond in this format: 
             stockName: extractedStockTicker, 
             fromDate: fromDate, (YYYY-MM-DD)
-            toDate: toDate (YYYY-MM-DD)
+            toDate: toDate (YYYY-MM-DD) (If time range is worded like, "last week" "over the last year, quarter, month, day, etc, use the current time as the basis. It is ${currentTime}
             periodTime: period. (can only be d, w, or m)
-            Defaults if N/A: fromDate: ${currentTime} minus one week, toDate: ${currentTime} interval: 1h
+            Defaults if N/A: fromDate: Current Date minus one week. Curren
             Query: ${queryString}`,
             max_tokens: 3000,
             temperature: .5,
@@ -136,6 +135,7 @@ async function api_search(queryString) {
         });
         return extractedInfo.data.choices[0].text;
     }
+
   // createApiLink function
   async function createApiLink(extractedInfo) {
     const apiLink = await openai.createCompletion({
@@ -165,7 +165,7 @@ async function api_search(queryString) {
       return cleanedLink;
     }
   }
-    
+  
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
     const apiCallDataString = JSON.stringify(apiCallData)
@@ -217,8 +217,9 @@ async function api_search(queryString) {
           model: "text-davinci-003",
           prompt: `
           Follow this workflow:
-          Instructions. Replace the variables in this link with the variables that were passed and return the link alone.
-          Link: https://www.eodhistoricaldata.com/api/real-time/{stockName}.US?api_token=63a2477acc2587.58203009&fmt=json
+          Instructions. Replace the variable stockName with the variable passed in below.
+          Output in this formatting: apiLink: Link
+          Link: https://www.eodhistoricaldata.com/api/real-time/stockName.US?api_token=63a2477acc2587.58203009&fmt=json
           Variables: ${extractedInfo}`,
           max_tokens: 3000,
           temperature: .5,
@@ -226,39 +227,37 @@ async function api_search(queryString) {
       });
       return apiLink.data.choices[0].text;
   }
-  // apiCall function
+
+
+// apiCall function
 async function apiCall(apiLink) {
-  return new Promise((resolve, reject) => {
-    https.get(apiLink, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      res.on('end', () => {
-        resolve(JSON.parse(data));
-      });
-    }).on('error', (err) => {
-      reject(err);
-    });
-  });
+  const cleanedLink = await cleanLink(apiLink);
+  const response = await axios.get(cleanedLink);
+  return response.data;
+
+  async function cleanLink(apiLink){
+    var cleanedLink = apiLink.replace("apiLink: ","");
+    return cleanedLink;
+  }
 }
-  // summarizeData function
+
+// summarizeData function
   async function summarizeData(apiCallData, queryString) {
-      const apiCallDataString = json.stringify(apiCallData)
-      const response = await openai.createCompletion({
-          model: "text-davinci-003",
-          prompt: `
-          Craft a brief response and summary of this data. 
-          Make values properly formatted with decimals and commas.
-          Answer the question using the data.
-          Data: ${apiCallDataString}
-          Question: ${queryString}
-          Response:`,
-          max_tokens: 3000,
-          temperature: .5,
-          stop: "/n",
-      })
-      return response.data.choices[0].text
+    const apiCallDataString = JSON.stringify(apiCallData)
+    const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Instructions: Parse the data, 
+        Summarize the insights.
+        The user will ask questions about it,
+        so make sure it is comprehensive.
+        Data: ${apiCallDataString}
+        Response:`,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    })
+    return response.data.choices[0].text
   }
   }
   
