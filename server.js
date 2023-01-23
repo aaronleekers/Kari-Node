@@ -1,5 +1,4 @@
 const http = require('http');
-const https = require('http');
 const url = require('url');
 const querystring = require('querystring');
 const { Configuration, OpenAIApi } = require('openai');
@@ -161,7 +160,7 @@ async function api_search(queryString, callback) {
   // apiCall function
   async function apiCall(apiLink) {
     return new Promise((resolve, reject) => {
-      https.get(apiLink, (res) => {
+      http.get(apiLink, (res) => {
         let data = '';
         res.on('data', (chunk) => {
           data += chunk;
@@ -238,7 +237,7 @@ async function api_search(queryString, callback) {
   // apiCall function
 async function apiCall(apiLink) {
   return new Promise((resolve, reject) => {
-    https.get(apiLink, (res) => {
+    http.get(apiLink, (res) => {
       let data = '';
       res.on('data', (chunk) => {
         data += chunk;
@@ -342,7 +341,7 @@ async function apiCall(apiLink) {
 
     async function apiCall(apiLink) {
       return new Promise((resolve, reject) => {
-        https.get(apiLink, (res) => {
+        http.get(apiLink, (res) => {
           let data = '';
           res.on('data', (chunk) => {
             data += chunk;
@@ -475,7 +474,7 @@ async function apiCall(apiLink) {
    // apiCall function
    async function apiCall(apiLink) {
     return new Promise((resolve, reject) => {
-      https.get(apiLink, (res) => {
+      http.get(apiLink, (res) => {
         let data = '';
         res.on('data', (chunk) => {
           data += chunk;
@@ -553,7 +552,7 @@ async function apiCall(apiLink) {
   // apiCall function
   async function apiCall(apiLink) {
     return new Promise((resolve, reject) => {
-      https.get(apiLink, (res) => {
+      http.get(apiLink, (res) => {
         let data = '';
         res.on('data', (chunk) => {
           data += chunk;
