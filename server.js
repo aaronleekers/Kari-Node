@@ -105,20 +105,20 @@ async function api_search(queryString) {
   async function eodRequest(queryString){
     // workflow Function
     console.log("extracting info!")
-    var extractedStock = await extractStock(queryString); // STEP 1 
-    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5
-    console.log("stock extracted!", extractedStock, extractedTimeRange); 
-    var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2
+    var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 
+    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1
+    console.log("stock & Time extracted!", extractedStock, extractedTimeRange); 
+    var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS:
     console.log("apiLink:",apiLink);
-    console.log("Making API call now!"); // STEP 3
-    const apiCallData = await apiCall(apiLink); // STEP 3.5
-    const summarizedData = await summarizeData(apiCallData); // STEP 4
+    console.log("Making API call now!"); // STEP 3 // TESTING TOKENS:
+    const apiCallData = await apiCall(apiLink); // STEP 3.5 // TESTING TOKENS:
+    const summarizedData = await summarizeData(apiCallData); // STEP 4 // TESTING TOKENS: 
     console.log(`Data Returned: ${summarizedData}`);
-    return summarizedData; // STEP 5
+    return summarizedData; // STEP 5 // FINAL
     // extractStock function
     async function extractStock(queryString) {
       const extractedStock = await openai.createCompletion({
-        model: "text-curie-001",
+        model: "text-davinci-003",
         prompt: `
         Please extract the company name from the following sentence, 
         convert it to a stock ticker format, 
@@ -126,9 +126,9 @@ async function api_search(queryString) {
         For example: "Apple" to "stockName: AAPL" or "Ford" to "stockName: F"
         Sentence: ${queryString}
         `,
-        max_tokens: 256,
+        max_tokens: 1024,
         temperature: .5,
-        stop: "stockName:",
+        stop: "/n",
       })
       return extractedStock.data.choices[0].text;
     }
@@ -156,7 +156,7 @@ async function api_search(queryString) {
     // createApiLink function
     async function createApiLink(extractedTimeRange, extractedStock) {
     const apiLink = await openai.createCompletion({
-        model: "text-curie-001",
+        model: "text-davinci-003",
         prompt: `
         Please help me create a link to access financial data for a specific stock by replacing the stock name, start date, end date and period time in the following format:
         apiLink: https://www.eodhistoricaldata.com/api/eod/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json&from=(fromDate)&to=(toDate)
@@ -164,9 +164,9 @@ async function api_search(queryString) {
         - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${extractedTimeRange}.
         - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
         `,
-        max_tokens: 128,
+        max_tokens: 1024,
         temperature: .5,
-        stop: "link",
+        stop: "/n",
     });
     return apiLink.data.choices[0].text;
     }
