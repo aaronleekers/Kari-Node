@@ -148,9 +148,8 @@ async function api_search(queryString, callback) {
         prompt: `
         Follow this workflow:
         1. Replace the variables in this link with the variables that were passed in.
-        2. All variables passed in this link should be, stockName, fromDate, toDate, period. 
-        3. Follow number 4 to start ouput.
-        4. https://
+        2. All variables passed in this link should be, stockName, fromDate, toDate, period.
+        3. Output in this formatting: apiLink: Link
         https://www.eodhistoricaldata.com/api/eod/stockName.US?api_token=63a2477acc2587.58203009&fmt=json&from=fromDate&to=toDate&period=periodTime
         Variables: ${extractedInfo}`,
         max_tokens: 3000,
@@ -159,22 +158,29 @@ async function api_search(queryString, callback) {
     });
     return apiLink.data.choices[0].text;
   }
+
 // apiCall function
-async function apiCall(apiLink) {
-  https.get(apiLink, (res) => {
-    let data = "";
-
-    res.on("data", (chunk) => {
-      data += chunk;
+  async function apiCall(apiLink) {
+    function cleanLink(apiLink) {
+      var cleanedLink = apiLink.replace("apiLink: ","");
+      return cleanedLink;
+    }
+    let cleanApiLink = cleanLink(apiLink);
+    https.get(cleanApiLink, (res) => {
+      let data = "";
+  
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+  
+      res.on("end", () => {
+        console.log(JSON.parse(data));
+      });
+    }).on("error", (err) => {
+      console.log("Error: " + err.message);
     });
-
-    res.on("end", () => {
-      console.log(JSON.parse(data));
-    });
-  }).on("error", (err) => {
-    console.log("Error: " + err.message);
-  });
-}
+  }
+  
 
 
 
