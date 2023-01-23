@@ -109,7 +109,7 @@ async function api_search(queryString) {
     console.log("extractedStock:",extractedStock);
     var modifiedQueryString = await modifyQueryString(queryString);
     console.log("modifiedQueryString:",modifiedQueryString);
-    var extractedTimeRange = await extractTimeRange(modifiedQueryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
+    var extractedTimeRange = await extractTimeRange(queryString, modifiedQueryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
     console.log("extractedTimeRange", extractedTimeRange);
     var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
@@ -158,7 +158,6 @@ async function api_search(queryString) {
            "last quarter": fromDate = (${year}-${month}-${day}) Minus three months (only subtract three months)
            "last year": fromDate = (${year}-${month}-${day}) Minus one year 
            Values in between fill in accordingly. (last 6 months minus 6 months) 
-           Please ensure that time range corresponds to queryString accurately before outputting them. It is important that the dates are accurate.
        4. Example: (Input: "How has TSLA performed over the last year?" Output: "Get me historical performance for TSLA from 2022-01-23 to ${year}-${month}-${day})
        4.5. queryString: ${queryString}
        5. Output modified queryString:
@@ -170,7 +169,7 @@ async function api_search(queryString) {
     }
 
     // extractTimeRange function
-    async function extractTimeRange(modifiedQueryString) {
+    async function extractTimeRange(modifiedQueryString, queryString) {
       const date = new Date();
       let day = date.getDate();
       let month = date.getMonth() + 1;
@@ -180,13 +179,13 @@ async function api_search(queryString) {
       const extractedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Please understand the current date: It is ${year}-${month}-${day}. Don't use any other dates to go off of except this date.
-        Please help me understand the time range in this query and provide only the dates in the format of YYYY-MM-DD.
-        If there are two specific dates, convert them to the specified format and output them only.
-        If there are no specific dates, see below:
-        Make toTime = ${year}-${month}-${day}. This is the current time.
-        Subtract amount of time suggested from input to get fromTime. 
-        Input: ${modifiedQueryString}
+        Please understand the current date: It is ${year}-${month}-${day}.
+      
+        Please review the modifiedQueryString and compare it against the queryString. 
+        The modifiedQueryString needs to be modified to correspond to the time range suggested in the queryString.
+
+        ModifiedQueryString: ${modifiedQueryString}
+        queryString: ${queryString}
         `,
         max_tokens: 2048,
         stop: "/n"
