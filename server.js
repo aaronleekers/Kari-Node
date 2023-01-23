@@ -60,7 +60,6 @@ server.listen(3000, '0.0.0.0', () => {
   console.log('Server running at http://0.0.0.0:3000');
 });
 
-
 // returns a number 1-6 based on the assigned requestType.
 async function qualifyRequestType(queryString) {
   const response = await openai.createCompletion({
@@ -81,12 +80,12 @@ async function qualifyRequestType(queryString) {
 } 
 // maps possible requestTypes to an array of associated functions for callback. functions are below.
 const requestFunctions = {
- 1: eodRequest,
- 2: realTimeRequest,
- 3: fundamentalsStockRequest,
- 4: fundamentalsCryptoRequest,
- 5: bulkRequest,
- 6: macroRequest
+ 1: eodRequest, // NOT COMPLETE
+ 2: realTimeRequest, // NOT COMPLETE 
+ 3: fundamentalsStockRequest, // NOT COMPLETE
+ 4: fundamentalsCryptoRequest, // NOT COMPLETE
+ 5: bulkRequest, // NOT COMPELTE
+ 6: macroRequest, // NOT COMPLETE 
 }
 
 // overall workflow. Decides which sub-workflow to execute, executes it, then returns the response.
@@ -102,37 +101,37 @@ async function api_search(queryString) {
 }
 
 // all the possible requestType workflows
-  // EOD Historical - Complete -  Not Tested
+  // EOD Historical - Not Complete -  Not Tested - 5 Steps 
   async function eodRequest(queryString){
     // workflow Function
     console.log("extracting info!")
-    var extractedStock = await extractStock(queryString);
-    var extractedTimeRange = await extractTimeRange(queryString);
-    console.log("stock extracted!", extractedStock, extractedTimeRange);
-    var apiLink = await createApiLink(extractedTimeRange, extractedStock);
+    var extractedStock = await extractStock(queryString); // STEP 1 
+    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5
+    console.log("stock extracted!", extractedStock, extractedTimeRange); 
+    var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2
     console.log("apiLink:",apiLink);
-    console.log("Making API call now!");
-    const apiCallData = await apiCall(apiLink);
-    const summarizedData = await summarizeData(apiCallData);
+    console.log("Making API call now!"); // STEP 3
+    const apiCallData = await apiCall(apiLink); // STEP 3.5
+    const summarizedData = await summarizeData(apiCallData); // STEP 4
     console.log(`Data Returned: ${summarizedData}`);
-    return summarizedData;
-    
-
+    return summarizedData; // STEP 5
     // extractStock function
     async function extractStock(queryString) {
       const extractedStock = await openai.createCompletion({
-        model: "text-davinci-003",
+        model: "text-curie-001",
         prompt: `
-        Instructions: Extract the stock name from this query. It needs to be formatted like a stock ticker.
-        If user passes in company name thats generic, format it to stock ticker. For example, if user says Apple, format to AAPL. If user says ford, format to F.
-        Here is the input ${queryString}`,
-        max_tokens: 3000,
+        Please extract the company name from the following sentence, 
+        convert it to a stock ticker format, 
+        and format the output as "stockName: (converted stock ticker)"
+        For example: "Apple" to "stockName: AAPL" or "Ford" to "stockName: F"
+        Sentence: ${queryString}
+        `,
+        max_tokens: 256,
         temperature: .5,
-        stop: "/n",
+        stop: "stockName:",
       })
       return extractedStock.data.choices[0].text;
     }
-
     // extractTimeRange function
     async function extractTimeRange(queryString) {
       const date = new Date();
@@ -143,43 +142,36 @@ async function api_search(queryString) {
       const extractedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Instructions: Determine the time range in this query. 
-        If you see two dates, convert them to YYYY-MM-DD and output them only.
-        If you see a vague time range, use ${year}-${month}-${day} as the toDate. subtract the appropriate amount of time from the toDate to get to the from date.
-        If user says over the last year, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
-        If user says over the last quarter, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
-        If user says over the last month, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
-        If user says over the last week, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
-        If user says over the last day, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
-        Respond like: fromDate: YYYY-MM-DD toDate: YYYY-MM-DD replacing with actual dates.
-        Here is the input: ${queryString}.`,
-        max_tokens: 3000,
+        Please help me understand the time range in this query and provide only the dates in the format of YYYY-MM-DD.
+        If there are two specific dates, convert them to the specified format and output them only.
+        If the time range is vague, use ${year}-${month}-${day} as the "to" date and subtract the appropriate amount of time to find the "from" date.
+        Please consider phrases like "over the last year", "over the last quarter", "over the last month", "over the last week" and "over the last day".
+        Input: ${queryString}
+        `,
+        max_tokens: 512,
         stop: "/n"
       })
       return extractedTimeRange.data.choices[0].text;
     }
-
-
-  // createApiLink function
-  async function createApiLink(extractedTimeRange, extractedStock) {
+    // createApiLink function
+    async function createApiLink(extractedTimeRange, extractedStock) {
     const apiLink = await openai.createCompletion({
-        model: "text-davinci-003",
+        model: "text-curie-001",
         prompt: `
-        Follow this workflow:
-        1. Replace the variables in this link with the variables that were passed in.
-        2. All variables passed in this link should be, stockName, fromDate, toDate, periodTime. Make sure dates are formatted like YYYY-MM-DD
-        3. Output in this formatting: 
-        apiLink: https://www.eodhistoricaldata.com/api/eod/stockName.US?api_token=63a2477acc2587.58203009&fmt=json&from=fromDate&to=toDate&period=periodTime
-        Variables: ${extractedTimeRange}, ${extractedStock}`,
-        max_tokens: 3000,
+        Please help me create a link to access financial data for a specific stock by replacing the stock name, start date, end date and period time in the following format:
+        apiLink: https://www.eodhistoricaldata.com/api/eod/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json&from=(fromDate)&to=(toDate)
+        - The stock name (stockName) should be replaced with the variable ${extractedStock}.
+        - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${extractedTimeRange}.
+        - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
+        `,
+        max_tokens: 128,
         temperature: .5,
-        stop: "/n",
+        stop: "link",
     });
     return apiLink.data.choices[0].text;
-  }
-
-// apiCall function
-  async function apiCall(apiLink) {
+    }
+    // apiCall function
+    async function apiCall(apiLink) {
     const cleanedLink = await cleanLink(apiLink);
     const response = await axios.get(cleanedLink);
     return response.data;
@@ -188,28 +180,30 @@ async function api_search(queryString) {
       var cleanedLink = apiLink.replace("apiLink: ","");
       return cleanedLink;
     }
-  }
-  
-  // summarizeData function
-  async function summarizeData(apiCallData) {
+    }
+    // summarizeData function
+    async function summarizeData(apiCallData) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Instructions: Parse the data, 
-        Summarize the insights.
-        The user will ask questions about it,
-        so make sure it is comprehensive.
+        Please extract key insights from the following data, 
+        with reference to the stock ${stockName}, and summarize 
+        them in a comprehensive manner. The insights should be 
+        clear and easy to understand, as the user will ask questions about them. 
+        - Provide a bullet point summary of the key insights.
+        - Provide a paragraph summary that goes into the nuances of the dataset, 
+        putting it in the context of the stock ${stockName}, current date ${year}-${month}-${day}, time range from ${fromDate} to ${toDate}.
+        
         Data: ${apiCallDataString}
-        Response:`,
+        `,
         max_tokens: 3000,
         temperature: .5,
-        stop: "/n",
+        stop: "Response",
     })
     return response.data.choices[0].text
+    }
   }
-  }
-
   // Real Time - Complete - Not Tested
   async function realTimeRequest(queryString){
   // workflow Function
