@@ -125,7 +125,7 @@ async function api_search(queryString) {
             Respond in this format: 
             stockName: extractedStockTicker, 
             fromDate: fromDate, (YYYY-MM-DD)
-            toDate: toDate (YYYY-MM-DD) (If time range is worded like, "last week" "over the last year, quarter, month, day, etc, use the current time as the basis. It is ${currentTime}
+            toDate: toDate (YYYY-MM-DD) (If time range is worded like, "last week" "over the last year, quarter, month, day, etc, use the current time as the basis. (Currently the month is January 2023.) It is ${currentTime}
             periodTime: period. (can only be d, w, or m)
             Defaults if N/A: fromDate: Current Date minus one week. Curren
             Query: ${queryString}`,
