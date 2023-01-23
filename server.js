@@ -5,7 +5,7 @@ const { Configuration, OpenAIApi } = require('openai');
 const { create } = require('domain');
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
-const fetch = require('node-fetch');
+import fetch from "node-fetch";
 
 // openAI auth
   const configuration = new Configuration({
