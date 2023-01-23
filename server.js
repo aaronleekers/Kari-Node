@@ -121,13 +121,17 @@ async function api_search(queryString) {
         const extractedInfo = await openai.createCompletion({
             model: "text-davinci-003",
             prompt: `
+            Instructions: Extract the datapoints from the query:
+            Arguments to extract: stockName(symbol), fromDate, toDate.
+            If user asks a question with a vague time range, such as (over the last day, week, month, quarter, year), make the toDate the current time: ${currentTime} and make the fromDate correspond with that depending on the request. For example, if toDate is current and user is asking for information over the last week, make fromDate the current date minus one week. 
             Extract the datapoints in this query. 
             Respond in this format: 
             stockName: extractedStockTicker, 
             fromDate: fromDate, (YYYY-MM-DD)
-            toDate: toDate (YYYY-MM-DD) (If time range is worded like, "last week" "over the last year, quarter, month, day, etc, use the current time as the basis. (Currently it is Q1 2023. (01/22/2023)) It is ${currentTime}
+            toDate: toDate (YYYY-MM-DD) 
+            (Currently it is Q1 2023. (01/22/2023)
             periodTime: period. (can only be d, w, or m)
-            Defaults if N/A: fromDate: Current Date minus one week. Curren
+            Defaults if N/A: fromDate ${currentTime} minus one week. toDate: ${currentTime}. stockName: AAPL
             Query: ${queryString}`,
             max_tokens: 3000,
             temperature: .5,
