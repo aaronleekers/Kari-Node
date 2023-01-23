@@ -44,9 +44,9 @@ async function handleRequest(req, res) {
         req.on('end', () => {
           const parsedBody = JSON.parse(body);
           const queryString = JSON.stringify(parsedBody.input.query);
-          api_search(queryString, (output) => {
+          api_search(queryString, (requestOutput) => {
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ output }));
+            res.end(JSON.stringify({ requestOutput }));
         });        
         });
     } else if (req.url === '/') {
