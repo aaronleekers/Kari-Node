@@ -105,11 +105,10 @@ async function api_search(queryString) {
   // EOD Historical - Complete -  Not Tested
   async function eodRequest(queryString){
     // workflow Function
-    var currentTime = new Date();
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString);
-    console.log("stock extracted!", extractedInfo);
     var extractedTimeRange = await extractTimeRange(queryString);
+    console.log("stock extracted!", extractedStock, extractedTimeRange);
     var apiLink = await createApiLink(extractedTimeRange, extractedStock);
     console.log("apiLink:",apiLink);
     console.log("Making API call now!");
