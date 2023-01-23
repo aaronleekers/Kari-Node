@@ -109,7 +109,7 @@ async function api_search(queryString) {
     console.log("extractedStock:",extractedStock);
     var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
     console.log("extractedTimeRange", extractedTimeRange);
-    var timeRangeCorrectOrNot = await qualifyTimeRangeCorrection(queryString, year, month, day, extractedTimeRange) // Step 1.6 // TESTING TOKENS: 
+    var timeRangeCorrectOrNot = await qualifyTimeRangeCorrection(queryString, extractedTimeRange) // Step 1.6 // TESTING TOKENS: 
     var correctedTimeRange = await correctTimeRange(timeRangeCorrectOrNot, extractedTimeRange); // STEP 1.7 // TESTING TOKENS: 
     var apiLink = await createApiLink(correctedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
