@@ -158,12 +158,12 @@ async function api_search(queryString) {
     const apiLink = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Please help me create a link to access financial data for a specific stock by replacing the stock name, start date, end date and period time in the following format:
+        Please help me create a link to access financial data for a specific stock by replacing the stock name, from date, to date in the following format:
         apiLink: https://www.eodhistoricaldata.com/api/eod/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json&from=(fromDate)&to=(toDate)
         - The stock name (stockName) should be replaced with the variable ${extractedStock}.
         - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${extractedTimeRange}.
         - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
-        - Respond in the format of: apiLink: apilink
+        - Respond in the format of: "apiLink: (apilink)"
         `,
         max_tokens: 2048,
         temperature: .3,
