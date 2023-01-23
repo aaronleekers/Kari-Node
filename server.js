@@ -206,7 +206,7 @@ async function api_search(queryString) {
         
         Data: ${apiCallDataString}
         `,
-        max_tokens: 3600,
+        max_tokens: 4000,
         temperature: .5,
         stop: "/n",
     })
