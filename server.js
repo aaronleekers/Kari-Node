@@ -105,13 +105,13 @@ async function api_search(queryString) {
   async function eodRequest(queryString){
     // workflow Function
     console.log("extracting info!")
-    var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 
-    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1
+    var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 
+    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 
     console.log("stock & Time extracted!", extractedStock, extractedTimeRange); 
     var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS:
     console.log("apiLink:",apiLink);
-    console.log("Making API call now!"); // STEP 3 // TESTING TOKENS:
-    const apiCallData = await apiCall(apiLink); // STEP 3.5 // TESTING TOKENS:
+    console.log("Making API call now!"); // STEP 3
+    const apiCallData = await apiCall(apiLink); // STEP 3.5 
     const summarizedData = await summarizeData(apiCallData); // STEP 4 // TESTING TOKENS: 
     console.log(`Data Returned: ${summarizedData}`);
     return summarizedData; // STEP 5 // FINAL
@@ -144,7 +144,7 @@ async function api_search(queryString) {
         prompt: `
         Please help me understand the time range in this query and provide only the dates in the format of YYYY-MM-DD.
         If there are two specific dates, convert them to the specified format and output them only.
-        If the time range is vague, use ${year}-${month}-${day} as the "to" date and subtract the appropriate amount of time to find the "from" date.
+        If the time range is vague, use ${year}-${month}-${day} (which is the current date. We are in the year 2023) as the "to" date and subtract the appropriate amount of time to find the "from" date.
         Please consider phrases like "over the last year", "over the last quarter", "over the last month", "over the last week" and "over the last day".
         Input: ${queryString}
         `,
@@ -163,10 +163,11 @@ async function api_search(queryString) {
         - The stock name (stockName) should be replaced with the variable ${extractedStock}.
         - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${extractedTimeRange}.
         - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
+        - Respond in the format of: apiLink: apilink
         `,
-        max_tokens: 1024,
-        temperature: .5,
-        stop: "/n",
+        max_tokens: 2048,
+        temperature: .3,
+        stop: "at the end of the link.",
     });
     return apiLink.data.choices[0].text;
     }
@@ -182,8 +183,12 @@ async function api_search(queryString) {
     }
     }
     // summarizeData function
-    async function summarizeData(apiCallData) {
+    async function summarizeData(apiCallData, extractedTimeRange) {
     const apiCallDataString = JSON.stringify(apiCallData)
+    const date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
@@ -193,13 +198,13 @@ async function api_search(queryString) {
         clear and easy to understand, as the user will ask questions about them. 
         - Provide a bullet point summary of the key insights.
         - Provide a paragraph summary that goes into the nuances of the dataset, 
-        putting it in the context of the stock ${stockName}, current date ${year}-${month}-${day}, time range from ${fromDate} to ${toDate}.
+        putting it in the context of the stock ${stockName}, current date ${year}-${month}-${day}, time range from ${extractedTimeRange}.
         
         Data: ${apiCallDataString}
         `,
         max_tokens: 3000,
         temperature: .5,
-        stop: "Response",
+        stop: "/n",
     })
     return response.data.choices[0].text
     }
