@@ -144,11 +144,23 @@ async function api_search(queryString) {
         prompt: `
         Please help me understand the time range in this query and provide only the dates in the format of YYYY-MM-DD.
         If there are two specific dates, convert them to the specified format and output them only.
-        If the time range is vague, use ${year}-${month}-${day} (which is the current date. We are in the year 2023) as the "to" date and subtract the appropriate amount of time to find the "from" date.
-        Please consider phrases like "over the last year(subtract one year from current time)", "over the last quarter(subtract three months from current time)", "over the last month(subtract one month from current time)", "over the last week(and so on)" and "over the last day(and so on)".
+        If there are no specific dates, see below:
+        Make toTime = ${year}-${month}-${day}. This is the current time.
+        Vague Time References to match: 
+        Over the last 5 years, make fromTime = ${year}-${month}-${day} minus 5 years.
+        Over the last 4 years, make fromTime = ${year}-${month}-${day} minus 4 years.
+        Over the last 3 years, make fromTime = ${year}-${month}-${day} minus 3 years.
+        Over the last 2 years, make fromTime = ${year}-${month}-${day} minus 2 years.
+        Over the last year, make fromTime = ${year}-${month}-${day} minus 1 year.
+        Over the last quarter, make fromTime = ${year}-${month}-${day} minus 3 months.
+        Over the last month, make fromTime = ${year}-${month}-${day} minus 1 month.
+        Over the last week, make fromTIme = ${year}-${month}-${day} minus 1 week.
+        Over the last day, make fromTime = ${year}-${month}-${day} minus 1 day.
+
+        For time ranges in between these times, subtract from currentTime accordingly. fromTime will equal either the chosen time based on the input, or the given one by input. toTime will equal either curren time, or one given by input.
         Input: ${queryString}
         `,
-        max_tokens: 1024,
+        max_tokens: 2048,
         stop: "/n"
       })
       return extractedTimeRange.data.choices[0].text;
@@ -183,7 +195,7 @@ async function api_search(queryString) {
     }
     }
     // summarizeData function
-    async function summarizeData(apiCallData, extractedTimeRange) {
+    async function summarizeData(apiCallData, extractedTimeRange, extractedStockName) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const date = new Date();
     let day = date.getDate();
@@ -193,12 +205,12 @@ async function api_search(queryString) {
         model: "text-davinci-003",
         prompt: `
         Please extract key insights from the following data, 
-        with reference to the stock ${stockName}, and summarize 
+        with reference to the stock ${extractedStockName}, and summarize 
         them in a comprehensive manner. The insights should be 
         clear and easy to understand, as the user will ask questions about them. 
         - Provide a bullet point summary of the key insights.
         - Provide a paragraph summary that goes into the nuances of the dataset, 
-        putting it in the context of the stock ${stockName}, current date ${year}-${month}-${day}, time range from ${extractedTimeRange}.
+      current date ${year}-${month}-${day}, time range from ${extractedTimeRange}.
         
         Data: ${apiCallDataString}
         `,
