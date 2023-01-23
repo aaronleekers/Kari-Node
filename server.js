@@ -142,6 +142,7 @@ async function api_search(queryString) {
       const extractedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
+        Please understand the current date: It is ${year}-${month}-${day}. Don't use any other dates to go off of except this date.
         Please help me understand the time range in this query and provide only the dates in the format of YYYY-MM-DD.
         If there are two specific dates, convert them to the specified format and output them only.
         If there are no specific dates, see below:
