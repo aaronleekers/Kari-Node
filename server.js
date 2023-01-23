@@ -92,14 +92,14 @@ const requestFunctions = {
 }
 
 // overall workflow. Decides which sub-workflow to execute, executes it, then returns the response.
-async function api_search(queryString, callback) {
+async function api_search(queryString) {
   console.log("api_search called with queryString:", queryString);
   const requestType = await qualifyRequestType(queryString);
   const intRequest = parseInt(requestType);
   console.log("Request Type:",intRequest);
   console.log(typeof intRequest);
   const requestOutput = await requestFunctions[intRequest](queryString);
-  callback(requestOutput);
+  return requestOutput;
   console.log("Request Output:", requestOutput);
 }
 
@@ -173,9 +173,10 @@ async function api_search(queryString, callback) {
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Craft a brief response and summary of this data. 
         Make values properly formatted with decimals and commas.
         Answer the question using the data.
+        Stick to the context of the question, only mention more
+        datapoints as you see fit for it padding the user's request.
         Data: ${apiCallDataString}
         Question: ${queryString}
         Response:`,
