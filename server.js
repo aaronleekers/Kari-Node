@@ -107,41 +107,62 @@ async function api_search(queryString) {
     // workflow Function
     var currentTime = new Date();
     console.log("extracting info!")
-    var extractedInfo = await extractInfo(queryString);
-    console.log("information extracted!", extractedInfo);
-    var apiLink = await createApiLink(extractedInfo);
+    var extractedStock = await extractStock(queryString);
+    console.log("stock extracted!", extractedInfo);
+    var extractedTimeRange = await extractTimeRange(queryString);
+    var apiLink = await createApiLink(extractedTimeRange, extractedStock);
     console.log("apiLink:",apiLink);
     console.log("Making API call now!");
     const apiCallData = await apiCall(apiLink);
     const summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
     return summarizedData;
+    
 
-    // extractInfo function
-    async function extractInfo(queryString) {
-        const extractedInfo = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: `
-            Instructions: Extract the datapoints from the query:
-            Arguments to extract: stockName(symbol), fromDate, toDate.
-            If user asks a question with a vague time range, such as (over the last day, week, month, quarter, year), make the toDate the current time: ${currentTime} and make the fromDate correspond with that depending on the request. For example, if toDate is current and user is asking for information over the last week, make fromDate the current date minus one week. 
-            Extract the datapoints in this query. 
-            Respond in this format: 
-            stockName: extractedStockTicker, 
-            fromDate: fromDate, (YYYY-MM-DD)
-            toDate: toDate (YYYY-MM-DD) 
-            (Currently it is Q1 2023. (01/22/2023)
-            periodTime: period. (can only be d, w, or m)
-            Query: ${queryString}`,
-            max_tokens: 3000,
-            temperature: .5,
-            stop: "/n",
-        });
-        return extractedInfo.data.choices[0].text;
+    // extractStock function
+    async function extractStock(queryString) {
+      const extractedStock = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Instructions: Extract the stock name from this query. It needs to be formatted like a stock ticker.
+        If user passes in company name thats generic, format it to stock ticker. For example, if user says Apple, format to AAPL. If user says ford, format to F.
+        Here is the input ${queryString}`,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+      })
+      return extractedStock.data.choices[0].text;
     }
 
+    // extractTimeRange function
+    async function extractTimeRange(queryString) {
+      const date = new Date();
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
+      let year = date.getFullYear();
+
+      const extractedTimeRange = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Instructions: Determine the time range in this query. 
+        If you see two dates, convert them to YYYY-MM-DD and output them only.
+        If you see a vague time range, use ${year}-${month}-${day} as the toDate. subtract the appropriate amount of time from the toDate to get to the from date.
+        If user says over the last year, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
+        If user says over the last quarter, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
+        If user says over the last month, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
+        If user says over the last week, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
+        If user says over the last day, use ${year}-${month}-${day} as the toDate, and the fromDate time minus one year.
+        Respond like: fromDate: YYYY-MM-DD toDate: YYYY-MM-DD replacing with actual dates.
+        Here is the input: ${queryString}.`,
+        max_tokens: 3000,
+        stop: "/n"
+      })
+      return extractedTimeRange.data.choices[0].text;
+    }
+
+
   // createApiLink function
-  async function createApiLink(extractedInfo) {
+  async function createApiLink(extractedTimeRange, extractedStock) {
     const apiLink = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
@@ -150,7 +171,7 @@ async function api_search(queryString) {
         2. All variables passed in this link should be, stockName, fromDate, toDate, period. Make sure dates are formatted like YYYY-MM-DD
         3. Output in this formatting: apiLink: Link
         https://www.eodhistoricaldata.com/api/eod/stockName.US?api_token=63a2477acc2587.58203009&fmt=json&from=fromDate&to=toDate&period=periodTime
-        Variables: ${extractedInfo}`,
+        Variables: ${extractedTimeRange}, ${extractedStock}`,
         max_tokens: 3000,
         temperature: .5,
         stop: "/n",
