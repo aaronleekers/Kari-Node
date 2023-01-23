@@ -116,6 +116,7 @@ async function api_search(queryString) {
     const summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
     return summarizedData;
+
     // extractInfo function
     async function extractInfo(queryString) {
         const extractedInfo = await openai.createCompletion({
@@ -131,7 +132,6 @@ async function api_search(queryString) {
             toDate: toDate (YYYY-MM-DD) 
             (Currently it is Q1 2023. (01/22/2023)
             periodTime: period. (can only be d, w, or m)
-            Defaults if N/A: fromDate ${currentTime} minus one week. toDate: ${currentTime}. stockName: AAPL
             Query: ${queryString}`,
             max_tokens: 3000,
             temperature: .5,
@@ -147,7 +147,7 @@ async function api_search(queryString) {
         prompt: `
         Follow this workflow:
         1. Replace the variables in this link with the variables that were passed in.
-        2. All variables passed in this link should be, stockName, fromDate, toDate, period.
+        2. All variables passed in this link should be, stockName, fromDate, toDate, period. Make sure dates are formatted like YYYY-MM-DD
         3. Output in this formatting: apiLink: Link
         https://www.eodhistoricaldata.com/api/eod/stockName.US?api_token=63a2477acc2587.58203009&fmt=json&from=fromDate&to=toDate&period=periodTime
         Variables: ${extractedInfo}`,
