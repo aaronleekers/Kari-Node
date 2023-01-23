@@ -107,7 +107,7 @@ async function api_search(queryString) {
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
     var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
-    var correctedTimeRange = await correctTimerange(extractedTimeRange) // STEP 1.7 // TESTING TOKENS: 
+    var correctedTimeRange = await correctTimerange(extractedTimeRange); // STEP 1.7 // TESTING TOKENS: 
     console.log("stock & Time extracted!", extractedStock, correctedTimeRange); 
     var apiLink = await createApiLink(correctedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
@@ -171,6 +171,7 @@ async function api_search(queryString) {
         temperature: .3,
         stop: "/n",
       })
+      return correctedTimeRange.data.choices[0].text;
     }
     // createApiLink function
     async function createApiLink(correctedTimeRange, extractedStock) {
