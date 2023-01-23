@@ -153,24 +153,20 @@ async function api_search(queryString) {
        convert the vague time range into a specific from date and make sure that the 
        to date is the current date. Double check your work to ensure accuracy before 
        outputting the modified queryString."
-
-       It is specific if there are two dates. 
-       It is vague if it is referring to "x amount of time ago" or "over last x amount of time"
-
+      
+       Current Date: ${year}-${month}-${day}.
 
        Table:
-       "last day": fromDate = (${year}-${month}-${day}) Minus one day (only subtract one day)
-       "last week": fromDate = (${year}-${month}-${day}) Minus one week (only subtract one week)
-       "last month": fromDate = (${year}-${month}-${day}) Minus one month (only subtract one month)
-       "last quarter": fromDate = (${year}-${month}-${day}) Minus three months (only subtract three months)
-       "last year": fromDate = (${year}-${month}-${day}) Minus one year 
-       Values in between fill in accordingly. (last 6 months minus 6 months) 
-       
-       4. Example: (Input: "How has TSLA performed over the last year?" Output: "Get me historical performance for TSLA from 2022-01-23 to ${year}-${month}-${day})
-       4.5. queryString: ${queryString}
-       5. Output modified queryString: 
+       "( Input: :How has (stockName) done over the last day?" Output: Get me historical performance for stockName from (Current DATE minus one day) to (Current DATE)"
+       "( Input: :How has (stockName) done over the last week?" Output: Get me historical performance for stockName from (Current DATE minus one week) to (Current DATE)"
+       "( Input: :How has (stockName) done over the last month?" Output: Get me historical performance for stockName from (Current DATE minus one month) to (Current DATE)"
+       "( Input: :How has (stockName) done over the last quarter?" Output: Get me historical performance for stockName from (Current DATE minus one quarter) to (Current DATE)"
+       "( Input: :How has (stockName) done over the last year?" Output: Get me historical performance for stockName from (Current DATE minus one year) to (Current DATE)"
+
+       queryString: ${queryString}
+       modified queryString: 
        `,
-       max_tokens: 2048,
+       max_tokens: 3000,
        stop: "/n"
       })
       return response.data.choices[0].text;
