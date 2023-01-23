@@ -98,6 +98,7 @@ async function api_search(queryString) {
   console.log(typeof intRequest);
   const requestOutput = await requestFunctions[intRequest](queryString);
   console.log(requestOutput);
+  return requestOutput;
 }
 
 
