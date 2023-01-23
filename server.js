@@ -137,7 +137,7 @@ async function api_search(queryString) {
       return extractedStock.data.choices[0].text;
     }
 
-    // modifyQueryString
+    // modifyQueeryString
     async function modifyQueryString(queryString) {
       const date = new Date();
       let day = date.getDate();
