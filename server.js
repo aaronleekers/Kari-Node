@@ -105,8 +105,8 @@ async function api_search(queryString) {
   async function eodRequest(queryString){
     // workflow Function
     console.log("extracting info!")
-    var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 
-    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 
+    var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA)
+    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 
     console.log("stock & Time extracted!", extractedStock, extractedTimeRange); 
     var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
@@ -195,7 +195,7 @@ async function api_search(queryString) {
     }
     }
     // summarizeData function
-    async function summarizeData(apiCallData, extractedTimeRange, extractedStockName) {
+    async function summarizeData(apiCallData, extractedTimeRange, extractedStock) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const date = new Date();
     let day = date.getDate();
@@ -205,16 +205,16 @@ async function api_search(queryString) {
         model: "text-davinci-003",
         prompt: `
         Please extract key insights from the following data, 
-        with reference to the stock ${extractedStockName}, and summarize 
+        with reference to the stock ${extractedStock}, and summarize 
         them in a comprehensive manner. The insights should be 
         clear and easy to understand, as the user will ask questions about them. 
         - Provide a bullet point summary of the key insights.
         - Provide a paragraph summary that goes into the nuances of the dataset, 
-      current date ${year}-${month}-${day}, time range from ${extractedTimeRange}.
+        current date ${year}-${month}-${day}, time range from ${extractedTimeRange}.
         
         Data: ${apiCallDataString}
         `,
-        max_tokens: 3000,
+        max_tokens: 3600,
         temperature: .5,
         stop: "/n",
     })
