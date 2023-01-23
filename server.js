@@ -97,9 +97,9 @@ async function api_search(queryString, callback) {
   console.log("Request Type:",intRequest);
   console.log(typeof intRequest);
   if (requestFunctions[intRequest]) {
-    const requestOutput =  requestFunctions[intRequest](queryString);
-    console.log("Request Output:", requestOutput);
+    const requestOutput = await requestFunctions[intRequest](queryString);
     callback(requestOutput);
+    console.log("Request Output:", requestOutput);
   } else {
     console.log("Invalid request type:", intRequest);
   }
