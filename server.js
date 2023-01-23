@@ -107,8 +107,9 @@ async function api_search(queryString) {
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
     var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
-    console.log("stock & Time extracted!", extractedStock, extractedTimeRange); 
-    var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
+    var correctedTimeRange = await correctTimerange(extractedTimeRange) // STEP 1.7 // TESTING TOKENS: 
+    console.log("stock & Time extracted!", extractedStock, correctedTimeRange); 
+    var apiLink = await createApiLink(correctedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
     console.log("Making API call now!"); // STEP 3
     const apiCallData = await apiCall(apiLink); // STEP 3.5 
@@ -155,16 +156,32 @@ async function api_search(queryString) {
       })
       return extractedTimeRange.data.choices[0].text;
     }
+
+    // correctTimeRange function
+    async function correctTImeRange(extractedTimeRange, queryString) {
+      const correctedTimeRange = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        View the user input, and compare the extractedTimeRange. 
+        If the date lines up to the time range declared in the user input, output the extractedTimeRange. 
+        If it does not correspond, modify the time range so it does correspond by modifying the fromDate.
+        Output like: "fromdate = (fromDate) toDate = (toDate)
+        `,
+        max_tokens: 2048,
+        temperature: .3,
+        stop: "/n",
+      })
+    }
     // createApiLink function
-    async function createApiLink(extractedTimeRange, extractedStock) {
+    async function createApiLink(correctedTimeRange, extractedStock) {
     const apiLink = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
         Please help me create a link to access financial data for a specific stock by replacing the stock name, from date, to date, and period in the following format:
         apiLink: https://www.eodhistoricaldata.com/api/eod/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json&from=(fromDate)&to=(toDate)&period=(period)
         - The stock name (stockName) should be replaced with the variable ${extractedStock}.
-        - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${extractedTimeRange}.
-        - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
+        - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${correctedTimeRange}.
+        - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${correctedTimeRange}.
         - The period should be determined by the length of the range. If the range is one year or longer, make it m. If it is 3 months or longer, make it w. if it is less, make it d.
         - Respond in the format of: "apiLink: (apilink)"
         - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT.
