@@ -159,35 +159,34 @@ async function api_search(queryString, callback) {
     return apiLink.data.choices[0].text;
   }
 
-
 // apiCall function
-async function apiCall(apiLink) {
-  function cleanLink(apiLink) {
-    var cleanedLink = apiLink.replace("apiLink: ","");
-    return cleanedLink;
-  }
-  let cleanApiLink = cleanLink(apiLink);
-  let responseData;
+  async function apiCall(apiLink) {
+    function cleanLink(apiLink) {
+      var cleanedLink = apiLink.replace("apiLink: ","");
+      return cleanedLink;
+    }
+    let cleanApiLink = cleanLink(apiLink);
 
-axios.get(cleanApiLink)
-.then(response => {
-    responseData = JSON.stringify(response.data);
-})
-.catch(error => {
-  console.log(error);
-});
-return responseData;
-}
+  axios.get(cleanApiLink)
+  .then(response => {
+    console.log(response.data);
+    return response.json();
+  })
+  .catch(error => {
+    console.log(error);
+  });
+  }
 
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
+    const apiCallDataString = JSON.stringify(apiCallData)
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
         Craft a brief response and summary of this data. 
         Make values properly formatted with decimals and commas.
         Answer the question using the data.
-        Data: ${apiCallData}
+        Data: ${apiCallDataString}
         Question: ${queryString}
         Response:`,
         max_tokens: 3000,
