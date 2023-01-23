@@ -155,8 +155,10 @@ async function api_search(queryString, callback) {
   // apiCall function
   async function apiCall(apiLink) {
     const response = await fetch(apiLink);
-    return response.json();
+    const data = response.json();
+    return data;
   }
+  
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
     const apiCallDataString = json.stringify(apiCallData)
