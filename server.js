@@ -41,8 +41,8 @@ async function handleRequest(req, res) {
         body += chunk.toString();
         });
         req.on('end', () => {
-        const queryString = JSON.stringify(querystring.parse(body));
-        api_search(queryString, (output) => {
+          const queryString = querystring.parse(body);
+          api_search(queryString, (output) => {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ output }));
         });
