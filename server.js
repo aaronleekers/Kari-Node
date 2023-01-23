@@ -41,11 +41,12 @@ async function handleRequest(req, res) {
         body += chunk.toString();
         });
         req.on('end', () => {
-          const queryString = querystring.parse(body);
+          const parsedBody = JSON.parse(body);
+          const queryString = JSON.stringify(parsedBody.input.query);
           api_search(queryString, (output) => {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ output }));
-        });
+        });        
         });
     } else if (req.url === '/') {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
