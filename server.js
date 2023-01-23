@@ -100,7 +100,6 @@ async function api_search(queryString) {
   console.log(typeof intRequest);
   const requestOutput = await requestFunctions[intRequest](queryString);
   return requestOutput;
-  console.log("Request Output:", requestOutput);
 }
 
 
@@ -173,12 +172,11 @@ async function api_search(queryString) {
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Make values properly formatted with decimals and commas.
-        Answer the question using the data.
-        Stick to the context of the question, only mention more
-        datapoints as you see fit for it padding the user's request.
+        Instructions: Parse the data, 
+        Summarize the insights.
+        The user will ask questions about it,
+        so make sure it is comprehensive.
         Data: ${apiCallDataString}
-        Question: ${queryString}
         Response:`,
         max_tokens: 3000,
         temperature: .5,
