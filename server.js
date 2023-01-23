@@ -208,6 +208,7 @@ async function api_search(queryString) {
           Respond in this format: 
           stockName: extractedStockTicker, 
           Defaults if N/A: stockName: SPY
+          Convert company names to stock tickers. If you see apple, make it AAPL, likewise with other companies.
           Query: ${queryString}`,
           max_tokens: 3000,
           temperature: .5,
