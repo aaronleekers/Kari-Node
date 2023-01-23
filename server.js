@@ -152,12 +152,13 @@ async function api_search(queryString) {
        2. Modify the queryString so it has specific dates. Modify it so it gives specific from and to dates, 
        of which the to date is the current date (${year}-${month}-${day}) and the from date is however long the queryString suggests the range is.
        3. It is important that the dates are accuraretely represented. So follow this table for converting the fromDate:
-       3a. last day - fromDate = (${year}-${month}-${day}) Minus one day
-           last week - fromDate = (${year}-${month}-${day}) Minus one week
-           last month - fromDate = (${year}-${month}-${day}) Minus one month
-           last quarter - fromDate = (${year}-${month}-${day}) Minus three months
-           last year - fromDate = (${year}-${month}-${day}) Minus one year
+       3a. "last day": fromDate = (${year}-${month}-${day}) Minus one day (only subtract one day)
+           "last week": fromDate = (${year}-${month}-${day}) Minus one week (only subtract one week)
+           "last month": fromDate = (${year}-${month}-${day}) Minus one month (only subtract one month)
+           "last quarter": fromDate = (${year}-${month}-${day}) Minus three months (only subtract three months)
+           "last year": fromDate = (${year}-${month}-${day}) Minus one year 
            Values in between fill in accordingly. (last 6 months minus 6 months) 
+           Please ensure that time range corresponds to queryString accurately before outputting them. It is important that the dates are accurate.
        4. Example: (Input: "How has TSLA performed over the last year?" Output: "Get me historical performance for TSLA from 2022-01-23 to ${year}-${month}-${day})
        4.5. queryString: ${queryString}
        5. Output modified queryString:
