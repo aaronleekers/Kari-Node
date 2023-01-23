@@ -167,7 +167,7 @@ async function api_search(queryString) {
   }
   
   // summarizeData function
-  async function summarizeData(apiCallData, queryString) {
+  async function summarizeData(apiCallData) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const response = await openai.createCompletion({
         model: "text-davinci-003",
@@ -189,12 +189,16 @@ async function api_search(queryString) {
   // Real Time - Complete - Not Tested
   async function realTimeRequest(queryString){
   // workflow Function
+  console.log("extracting info!")
   var extractedInfo = await extractInfo(queryString);
-  console.log("")
+  console.log("information extracted!", extractedInfo);
   var apiLink = await createApiLink(extractedInfo);
-  var apiCallData = await apiCall(apiLink);
-  var summarizedData = await summarizeData(apiCallData);
+  console.log("apiLink:",apiLink);
+  console.log("Making API call now!");
+  const apiCallData = await apiCall(apiLink);
+  const summarizedData = await summarizeData(apiCallData);
   console.log(`Data Returned: ${summarizedData}`);
+  return summarizedData;
   // extractInfo function
   async function extractInfo(queryString) {
       const extractedInfo = await openai.createCompletion({
@@ -242,7 +246,7 @@ async function apiCall(apiLink) {
 }
 
 // summarizeData function
-  async function summarizeData(apiCallData, queryString) {
+  async function summarizeData(apiCallData) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const response = await openai.createCompletion({
         model: "text-davinci-003",
