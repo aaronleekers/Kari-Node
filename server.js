@@ -194,9 +194,9 @@ async function api_search(queryString) {
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Please extract key insights from the following data, 
-        with reference to the stock ${extractedStock}, and summarize 
-        them in a comprehensive manner. The insights should be 
+        Be specific with values. Format them to 2 decimals and use USD. 
+        Please extract key insights from the following data.
+        Write them in a comprehensive manner. The insights should be 
         clear and easy to understand, as the user will ask questions about them. 
         - Provide a bullet point summary of the key insights.
         - Provide a paragraph summary that goes into the nuances of the dataset, 
