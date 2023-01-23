@@ -107,18 +107,17 @@ async function api_search(queryString) {
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
     console.log("extractedStock:",extractedStock);
-    var modifiedQueryString = await timeRangeSpecificOrVague(queryString);
+    var modifiedQueryString = await modifyQueryString(queryString);
     console.log("modifiedQueryString:",modifiedQueryString);
     var extractedTimeRange = await extractTimeRange(modifiedQueryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
     console.log("extractedTimeRange", extractedTimeRange);
-    var apiLink = await createApiLink(correctedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
+    var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
     console.log("Making API call now!"); // STEP 3
     const apiCallData = await apiCall(apiLink); // STEP 3.5 
     const summarizedData = await summarizeData(apiCallData); // STEP 4 // TESTING TOKENS: 
     console.log(`Data Returned: ${summarizedData}`);
     return summarizedData; // STEP 5 // FINAL
-
 
     // extractStock function
     async function extractStock(queryString) {
@@ -138,8 +137,8 @@ async function api_search(queryString) {
       return extractedStock.data.choices[0].text;
     }
 
-    // timeRangeSpecificOrVague
-    async function timeRangeSpecificOrVague(queryString) {
+    // modifyQueryString
+    async function modifyQueryString(queryString) {
       const date = new Date();
       let day = date.getDate();
       let month = date.getMonth() + 1;
@@ -152,9 +151,16 @@ async function api_search(queryString) {
        It is specific if there are two dates. It is vague if it is referring to "x amount of time ago" or "over last x amount of time"
        2. Modify the queryString so it has specific dates. Modify it so it gives specific from and to dates, 
        of which the to date is the current date (${year}-${month}-${day}) and the from date is however long the queryString suggests the range is.
-       3. Example: (Input: "How has TSLA performed over the last year?" Output: "Get me historical performance for TSLA from 2022-01-23 to ${year}-${month}-${day})
-       3.5. queryString: ${queryString}
-       4. Output modified queryString:
+       3. It is important that the dates are accuraretely represented. So follow this table for converting the fromDate:
+       3a. last day - fromDate = (${year}-${month}-${day}) Minus one day
+           last week - fromDate = (${year}-${month}-${day}) Minus one week
+           last month - fromDate = (${year}-${month}-${day}) Minus one month
+           last quarter - fromDate = (${year}-${month}-${day}) Minus three months
+           last year - fromDate = (${year}-${month}-${day}) Minus one year
+           Values in between fill in accordingly. (last 6 months minus 6 months) 
+       4. Example: (Input: "How has TSLA performed over the last year?" Output: "Get me historical performance for TSLA from 2022-01-23 to ${year}-${month}-${day})
+       4.5. queryString: ${queryString}
+       5. Output modified queryString:
        `,
        max_tokens: 2048,
        stop: "/n"
@@ -163,7 +169,7 @@ async function api_search(queryString) {
     }
 
     // extractTimeRange function
-    async function extractTimeRange(queryString) {
+    async function extractTimeRange(modifiedQueryString) {
       const date = new Date();
       let day = date.getDate();
       let month = date.getMonth() + 1;
@@ -179,7 +185,7 @@ async function api_search(queryString) {
         If there are no specific dates, see below:
         Make toTime = ${year}-${month}-${day}. This is the current time.
         Subtract amount of time suggested from input to get fromTime. 
-        Input: ${queryString}
+        Input: ${modifiedQueryString}
         `,
         max_tokens: 2048,
         stop: "/n"
@@ -224,7 +230,7 @@ async function api_search(queryString) {
     }
     }
     // summarizeData function
-    async function summarizeData(apiCallData, extractedTimeRange, extractedStock) {
+    async function summarizeData(apiCallData, extractedTimeRange) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const date = new Date();
     let day = date.getDate();
