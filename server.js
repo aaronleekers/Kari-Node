@@ -112,9 +112,14 @@ async function api_search(queryString, callback) {
   async function eodRequest(queryString){
     // workflow Function
     var currentTime = new Date();
+    console.log("extracting info!")
     var extractedInfo = await extractInfo(queryString);
+    console.log("information extracted!", extractedInfo);
     var apiLink = await createApiLink(extractedInfo);
+    console.log("apiLink:",apiLink)
+    console.log("Making API call now!");
     var apiCallData = await apiCall(apiLink);
+    console.log("data received:", apiCallData);
     var summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
     // extractInfo function
