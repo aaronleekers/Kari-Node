@@ -105,8 +105,8 @@ async function api_search(queryString) {
   async function eodRequest(queryString){
     // workflow Function
     console.log("extracting info!")
-    var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA)
-    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 
+    var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
+    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m)
     console.log("stock & Time extracted!", extractedStock, extractedTimeRange); 
     var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
