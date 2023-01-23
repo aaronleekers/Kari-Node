@@ -116,7 +116,7 @@ async function api_search(queryString) {
     const apiCallData = await apiCall(apiLink);
     const summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
-    callback(summarizedData);
+    return summarizedData;
     // extractInfo function
     async function extractInfo(queryString) {
         const extractedInfo = await openai.createCompletion({
