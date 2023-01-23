@@ -107,10 +107,10 @@ async function api_search(queryString) {
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
     console.log("extractedStock:",extractedStock);
-    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
+    var modifiedQueryString = await timeRangeSpecificOrVague(queryString);
+    console.log("modifiedQueryString:",modifiedQueryString);
+    var extractedTimeRange = await extractTimeRange(modifiedQueryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
     console.log("extractedTimeRange", extractedTimeRange);
-    var timeRangeCorrectOrNot = await qualifyTimeRangeCorrection(queryString, extractedTimeRange) // Step 1.6 // TESTING TOKENS: 
-    var correctedTimeRange = await correctTimeRange(timeRangeCorrectOrNot, extractedTimeRange); // STEP 1.7 // TESTING TOKENS: 
     var apiLink = await createApiLink(correctedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
     console.log("Making API call now!"); // STEP 3
@@ -118,6 +118,8 @@ async function api_search(queryString) {
     const summarizedData = await summarizeData(apiCallData); // STEP 4 // TESTING TOKENS: 
     console.log(`Data Returned: ${summarizedData}`);
     return summarizedData; // STEP 5 // FINAL
+
+
     // extractStock function
     async function extractStock(queryString) {
       const extractedStock = await openai.createCompletion({
@@ -135,6 +137,31 @@ async function api_search(queryString) {
       })
       return extractedStock.data.choices[0].text;
     }
+
+    // timeRangeSpecificOrVague
+    async function timeRangeSpecificOrVague(queryString) {
+      const date = new Date();
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
+      let year = date.getFullYear();
+
+      const response = await openai.createCompletion({
+       model: "text-davinci-003", 
+       prompt: `
+       1. View the queryString, and decide if the time range in it has specific dates or is a vague time range.
+       It is specific if there are two dates. It is vague if it is referring to "x amount of time ago" or "over last x amount of time"
+       2. Modify the queryString so it has specific dates. Modify it so it gives specific from and to dates, 
+       of which the to date is the current date (${year}-${month}-${day}) and the from date is however long the queryString suggests the range is.
+       3. Example: (Input: "How has TSLA performed over the last year?" Output: "Get me historical performance for TSLA from 2022-01-23 to ${year}-${month}-${day})
+       3.5. queryString: ${queryString}
+       4. Output modified queryString:
+       `,
+       max_tokens: 2048,
+       stop: "/n"
+      })
+      return response.data.choices[0].text;
+    }
+
     // extractTimeRange function
     async function extractTimeRange(queryString) {
       const date = new Date();
@@ -159,71 +186,25 @@ async function api_search(queryString) {
       })
       return extractedTimeRange.data.choices[0].text;
     }
-    // qualifyTimerange function
-    async function qualifyTimeRangeCorrection(queryString, extractedTimeRange) {
-      const date = new Date();
-      let day = date.getDate();
-      let month = date.getMonth() + 1;
-      let year = date.getFullYear();
 
-      const qualifyTimeRangeCorrection = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: `
-          View the queryString and the extractedTimeRange. 
-          Determine if the extracted date range corresponds to the date range suggsted in the queryString.
-          If there are no specific dates in queryString, toDate should be considered as ${year}-${month}-${day}.
-          Respond Yes it does or no it does not. Then return the prompt to GPT to modify the extractedTimeRange to match, 
-          tell it how it doesn't match, and give instructions for it to match.
-
-          queryString: ${queryString}
-          extractedTimeRange: ${extractedTimeRange}
-          `,
-        max_tokens: 2048,
-        stop: "/n"
-    })
-    return qualifyTimeRangeCorrection.data.choices[0].text;
-    }
-    // correctTimeRange function
-    async function correctTimeRange(extractedTimeRange, queryString, timeRangeCorrectOrNot) {
-      const date = new Date();
-      let day = date.getDate();
-      let month = date.getMonth() + 1;
-      let year = date.getFullYear();
-
-      const correctedTimeRange = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: ` 
-        The current date is ${year}-${month}-${day}
-
-        There are three variables to review: extractedTimeRange, queryString, 
-        and a string that determines if the time range needs to be corrected or not.
-        Your job is to review the queryString and the correction instructions, and output the modified
-        extractedTimeRange.
-        Output like: "fromdate = (fromDate) toDate = (toDate)
-
-        Modification instructions: ${timeRangeCorrectOrNot}
-        extractedTimeRange: ${extractedTimeRange}
-        queryString: ${queryString}
-        `,
-        max_tokens: 2048,
-        temperature: .3,
-        stop: "/n",
-      })
-      return correctedTimeRange.data.choices[0].text;
-    }
     // createApiLink function
     async function createApiLink(correctedTimeRange, extractedStock) {
+      const date = new Date();
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
+      let year = date.getFullYear();
     const apiLink = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
         Please help me create a link to access financial data for a specific stock by replacing the stock name, from date, to date, and period in the following format:
         apiLink: https://www.eodhistoricaldata.com/api/eod/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json&from=(fromDate)&to=(toDate)&period=(period)
         - The stock name (stockName) should be replaced with the variable ${extractedStock}.
-        - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${correctedTimeRange}.
-        - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${correctedTimeRange}.
+        - The from date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${correctedTimeRange}.
+        - The to date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${correctedTimeRange}.
+        - If there is no end date (toDate), use ${year}-${month}-${day}
         - The period should be determined by the length of the range. If the range is one year or longer, make it m. If it is 3 months or longer, make it w. if it is less, make it d.
         - Respond in the format of: "apiLink: (apilink)"
-        - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT.
+        - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT. DO NOT RESPOND WITH "Answer:". The only prefix before the link should be apiLink:
         `,
         max_tokens: 2048,
         temperature: .3,
