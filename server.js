@@ -117,10 +117,10 @@ async function api_search(queryString, callback) {
     var extractedInfo = await extractInfo(queryString);
     console.log("information extracted!", extractedInfo);
     var apiLink = await createApiLink(extractedInfo);
-    console.log("apiLink:",apiLink)
+    console.log("apiLink:",apiLink);
     console.log("Making API call now!");
-    var apiCallData = await apiCall(apiLink);
-    var summarizedData = await summarizeData(apiCallData);
+    const apiCallData = await apiCall(apiLink);
+    const summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
     // extractInfo function
     async function extractInfo(queryString) {
@@ -175,7 +175,6 @@ async function api_search(queryString, callback) {
     console.log(error);
   });
   }
-  
 
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
