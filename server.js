@@ -1,11 +1,11 @@
 const http = require('http');
+const https = require('http');
 const url = require('url');
 const querystring = require('querystring');
 const { Configuration, OpenAIApi } = require('openai');
 const { create } = require('domain');
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
-import fetch from "node-fetch";
 
 // openAI auth
   const configuration = new Configuration({
@@ -153,9 +153,21 @@ async function api_search(queryString, callback) {
   }
   // apiCall function
   async function apiCall(apiLink) {
-    const response = await fetch(apiLink);
-    return response.json();
+    return new Promise((resolve, reject) => {
+      https.get(apiLink, (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          resolve(JSON.parse(data));
+        });
+      }).on('error', (err) => {
+        reject(err);
+      });
+    });
   }
+
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
     const apiCallDataString = json.stringify(apiCallData)
@@ -217,10 +229,21 @@ async function api_search(queryString, callback) {
       return apiLink.data.choices[0].text;
   }
   // apiCall function
-  async function apiCall(apiLink) {
-      const response = await fetch(apiLink);
-      return response.json();
-  }
+async function apiCall(apiLink) {
+  return new Promise((resolve, reject) => {
+    https.get(apiLink, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        resolve(JSON.parse(data));
+      });
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
+}
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
       const apiCallDataString = json.stringify(apiCallData)
@@ -310,9 +333,20 @@ async function api_search(queryString, callback) {
     return apiLink.data.choices[0].text;
     }
 
-    async function apiCall(apiLink){
-      const response = await fetch(apiLink);
-      return response.json();
+    async function apiCall(apiLink) {
+      return new Promise((resolve, reject) => {
+        https.get(apiLink, (res) => {
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          res.on('end', () => {
+            resolve(JSON.parse(data));
+          });
+        }).on('error', (err) => {
+          reject(err);
+        });
+      });
     }
 
     async function summarizeData(apiCallData, queryString){
@@ -433,9 +467,20 @@ async function api_search(queryString, callback) {
    }
    // apiCall function
    async function apiCall(apiLink) {
-       const response = await fetch(apiLink);
-       return response.json();
-   }
+    return new Promise((resolve, reject) => {
+      https.get(apiLink, (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          resolve(JSON.parse(data));
+        });
+      }).on('error', (err) => {
+        reject(err);
+      });
+    });
+  }
    // summarizeData function
    async function summarizeData(apiCallData, queryString) {
        const apiCallDataString = json.stringify(apiCallData)
@@ -500,8 +545,19 @@ async function api_search(queryString, callback) {
   }
   // apiCall function
   async function apiCall(apiLink) {
-      const response = await fetch(apiLink);
-      return response.json();
+    return new Promise((resolve, reject) => {
+      https.get(apiLink, (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          resolve(JSON.parse(data));
+        });
+      }).on('error', (err) => {
+        reject(err);
+      });
+    });
   }
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
