@@ -145,10 +145,10 @@ async function api_search(queryString) {
         Please help me understand the time range in this query and provide only the dates in the format of YYYY-MM-DD.
         If there are two specific dates, convert them to the specified format and output them only.
         If the time range is vague, use ${year}-${month}-${day} (which is the current date. We are in the year 2023) as the "to" date and subtract the appropriate amount of time to find the "from" date.
-        Please consider phrases like "over the last year", "over the last quarter", "over the last month", "over the last week" and "over the last day".
+        Please consider phrases like "over the last year(subtract one year from current time)", "over the last quarter(subtract three months from current time)", "over the last month(subtract one month from current time)", "over the last week(and so on)" and "over the last day(and so on)".
         Input: ${queryString}
         `,
-        max_tokens: 512,
+        max_tokens: 1024,
         stop: "/n"
       })
       return extractedTimeRange.data.choices[0].text;
