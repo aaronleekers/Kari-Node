@@ -158,13 +158,13 @@ async function api_search(queryString, callback) {
     const data = response.json();
     return data;
   }
-  
+
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
     const apiCallDataString = json.stringify(apiCallData)
     const response = await openai.createCompletion({
         model: "text-davinci-003",
-        prompt: `
+        prompt:`
         Craft a brief response and summary of this data. 
         Make values properly formatted with decimals and commas.
         Answer the question using the data.

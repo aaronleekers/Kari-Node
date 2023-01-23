@@ -163,7 +163,7 @@ async function api_search(queryString, callback) {
   async function apiCall(apiLink) {
     const cleanedLink = await cleanLink(apiLink);
     const response = await axios.get(cleanedLink);
-    return response.json();
+    return response.text();
 
     async function cleanLink(apiLink){
       var cleanedLink = apiLink.replace("apiLink: ","");
