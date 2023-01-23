@@ -119,7 +119,6 @@ async function api_search(queryString, callback) {
     console.log("apiLink:",apiLink)
     console.log("Making API call now!");
     var apiCallData = await apiCall(apiLink);
-    console.log("data received:", apiCallData);
     var summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
     // extractInfo function
@@ -182,12 +181,9 @@ async function api_search(queryString, callback) {
   }
   
 
-
-
-
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
-    const apiCallDataString = json.stringify(apiCallData)
+    const apiCallDataString = JSON.stringify(apiCallData)
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
