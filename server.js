@@ -147,20 +147,28 @@ async function api_search(queryString) {
       const response = await openai.createCompletion({
        model: "text-davinci-003", 
        prompt: `
-       1. View the queryString, and decide if the time range in it has specific dates or is a vague time range.
-       It is specific if there are two dates. It is vague if it is referring to "x amount of time ago" or "over last x amount of time"
-       2. Modify the queryString so it has specific dates. Modify it so it gives specific from and to dates, 
-       of which the to date is the current date (${year}-${month}-${day}) and the from date is however long the queryString suggests the range is.
-       3. It is important that the dates are accuraretely represented. So follow this table for converting the fromDate:
-       3a. "last day": fromDate = (${year}-${month}-${day}) Minus one day (only subtract one day)
-           "last week": fromDate = (${year}-${month}-${day}) Minus one week (only subtract one week)
-           "last month": fromDate = (${year}-${month}-${day}) Minus one month (only subtract one month)
-           "last quarter": fromDate = (${year}-${month}-${day}) Minus three months (only subtract three months)
-           "last year": fromDate = (${year}-${month}-${day}) Minus one year 
-           Values in between fill in accordingly. (last 6 months minus 6 months) 
+
+       "Please modify the following queryString to correctly calculate the fromDate 
+       based on the vague time range specified. Use the provided table to accurately 
+       convert the vague time range into a specific from date and make sure that the 
+       to date is the current date. Double check your work to ensure accuracy before 
+       outputting the modified queryString."
+
+       It is specific if there are two dates. 
+       It is vague if it is referring to "x amount of time ago" or "over last x amount of time"
+
+
+       Table:
+       "last day": fromDate = (${year}-${month}-${day}) Minus one day (only subtract one day)
+       "last week": fromDate = (${year}-${month}-${day}) Minus one week (only subtract one week)
+       "last month": fromDate = (${year}-${month}-${day}) Minus one month (only subtract one month)
+       "last quarter": fromDate = (${year}-${month}-${day}) Minus three months (only subtract three months)
+       "last year": fromDate = (${year}-${month}-${day}) Minus one year 
+       Values in between fill in accordingly. (last 6 months minus 6 months) 
+       
        4. Example: (Input: "How has TSLA performed over the last year?" Output: "Get me historical performance for TSLA from 2022-01-23 to ${year}-${month}-${day})
        4.5. queryString: ${queryString}
-       5. Output modified queryString:
+       5. Output modified queryString: 
        `,
        max_tokens: 2048,
        stop: "/n"
