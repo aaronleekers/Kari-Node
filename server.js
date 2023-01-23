@@ -106,10 +106,11 @@ async function api_search(queryString) {
     // workflow Function
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
+    console.log("extractedStock:",extractedStock);
     var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
-    var timeRangeCorrectOrNot = await qualifyTimeRangeCorrection(queryString, year, month, day, extractedTimeRange) 
+    console.log("extractedTimeRange", extractedTimeRange);
+    var timeRangeCorrectOrNot = await qualifyTimeRangeCorrection(queryString, year, month, day, extractedTimeRange) // Step 1.6 // TESTING TOKENS: 
     var correctedTimeRange = await correctTimeRange(timeRangeCorrectOrNot, extractedTimeRange); // STEP 1.7 // TESTING TOKENS: 
-    console.log("stock & Time extracted!", extractedStock, correctedTimeRange); 
     var apiLink = await createApiLink(correctedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
     console.log("Making API call now!"); // STEP 3
@@ -158,28 +159,36 @@ async function api_search(queryString) {
       })
       return extractedTimeRange.data.choices[0].text;
     }
+    // qualifyTimerange function
+    async function qualifyTimeRangeCorrection(queryString, extractedTimeRange) {
+      const date = new Date();
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
+      let year = date.getFullYear();
 
+      const qualifyTimeRangeCorrection = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+          View the queryString and the extractedTimeRange. 
+          Determine if the extracted date range corresponds to the date range suggsted in the queryString.
+          If there are no specific dates in queryString, toDate should be considered as ${year}-${month}-${day}.
+          Respond Yes it does or no it does not. Then return the prompt to GPT to modify the extractedTimeRange to match, 
+          tell it how it doesn't match, and give instructions for it to match.
 
-async function qualifyTimeRangeCorrection(year, month, day, queryString, extractedTimeRange) {
-  const qualifyTimeRangeCorrection = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: `
-    View the queryString and the extractedTimeRange. 
-    Determine if the extracted date range corresponds to the date range suggsted in the queryString.
-    If there are no specific dates in queryString, toDate should be considered as ${year}-${month}-${day}.
-    Respond Yes it does or no it does not. Then return the prompt to GPT to modify the extractedTimeRange to match, 
-    tell it how it doesn't match, and give instructions for it to match.
-    queryString: ${queryString}
-    extractedTimeRange: ${extractedTimeRange}
-    `,
-    max_tokens: 2048,
-    stop: "/n"
-  })
-  return qualifyTimeRangeCorrection.data.choices[0].text;
-}
-      
+          queryString: ${queryString}
+          extractedTimeRange: ${extractedTimeRange}
+          `,
+        max_tokens: 2048,
+        stop: "/n"
+    })
+    return qualifyTimeRangeCorrection.data.choices[0].text;
+    }
     // correctTimeRange function
-    async function correctTimeRange(extractedTimeRange, queryString, day, month, year, timeRangeCorrectOrNot) {
+    async function correctTimeRange(extractedTimeRange, queryString, timeRangeCorrectOrNot) {
+      const date = new Date();
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
+      let year = date.getFullYear();
 
       const correctedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
@@ -260,6 +269,7 @@ async function qualifyTimeRangeCorrection(year, month, day, queryString, extract
     return response.data.choices[0].text
     }
   }
+
   // Real Time - Complete - Not Tested
   async function realTimeRequest(queryString){
   // workflow Function
