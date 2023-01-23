@@ -161,22 +161,16 @@ async function api_search(queryString, callback) {
 
 // apiCall function
   async function apiCall(apiLink) {
-    function cleanLink(apiLink) {
+    const cleanedLink = await cleanLink(apiLink);
+    const response = await axios.get(cleanedLink);
+    return response.json();
+
+    async function cleanLink(apiLink){
       var cleanedLink = apiLink.replace("apiLink: ","");
       return cleanedLink;
     }
-    let cleanApiLink = cleanLink(apiLink);
-
-  axios.get(cleanApiLink)
-  .then(response => {
-    console.log(response.data);
-    return response.json();
-  })
-  .catch(error => {
-    console.log(error);
-  });
   }
-
+    
   // summarizeData function
   async function summarizeData(apiCallData, queryString) {
     const apiCallDataString = JSON.stringify(apiCallData)
