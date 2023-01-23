@@ -146,18 +146,7 @@ async function api_search(queryString) {
         If there are two specific dates, convert them to the specified format and output them only.
         If there are no specific dates, see below:
         Make toTime = ${year}-${month}-${day}. This is the current time.
-        Vague Time References to match: 
-        "Over the last 5 years", make fromTime = ${year}-${month}-${day} less 5 years.
-        "Over the last 4 years", make fromTime = ${year}-${month}-${day} less 4 years.
-        "Over the last 3 years", make fromTime = ${year}-${month}-${day} less 3 years.
-        "Over the last 2 years", make fromTime = ${year}-${month}-${day} less 2 years.
-        "Over the last year", make fromTime = ${year}-${month}-${day} less 1 year.
-        "Over the last quarter", make fromTime = ${year}-${month}-${day} less 3 months.
-        "Over the last month", make fromTime = ${year}-${month}-${day} less 1 month.
-        "Over the last week", make fromTIme = ${year}-${month}-${day} less 1 week.
-        "Over the last day", make fromTime = ${year}-${month}-${day} less 1 day.
-
-        For time ranges in between these times, subtract from currentTime accordingly. fromTime will equal either the chosen time based on the input, or the given one by input. toTime will equal either curren time, or one given by input.
+        Subtract amount of time suggested from input to get fromTime. 
         Input: ${queryString}
         `,
         max_tokens: 2048,
@@ -176,10 +165,11 @@ async function api_search(queryString) {
         - The start date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${extractedTimeRange}.
         - The end date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
         - Respond in the format of: "apiLink: (apilink)"
+        - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT.
         `,
         max_tokens: 2048,
         temperature: .3,
-        stop: "at the end of the link.",
+        stop: "/n",
     });
     return apiLink.data.choices[0].text;
     }
