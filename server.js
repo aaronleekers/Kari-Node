@@ -41,10 +41,10 @@ async function handleRequest(req, res) {
         req.on('data', (chunk) => {
         body += chunk.toString();
         });
-        req.on('end', () => {
+        req.on('end', async () => {
           const parsedBody = JSON.parse(body);
           const queryString = JSON.stringify(parsedBody.input.query);
-          const requestOutput = api_search(queryString);
+          const requestOutput = await api_search(queryString);
           res.end(JSON.stringify(requestOutput));       
         });
     } else if (req.url === '/') {
@@ -116,7 +116,7 @@ async function api_search(queryString) {
     const apiCallData = await apiCall(apiLink);
     const summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
-    return summarizedData;
+    callback(summarizedData);
     // extractInfo function
     async function extractInfo(queryString) {
         const extractedInfo = await openai.createCompletion({
