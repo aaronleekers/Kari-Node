@@ -58,19 +58,22 @@ async function handleRequest(req, res) {
 server.listen(3000, '0.0.0.0', () => {
   console.log('Server running at http://0.0.0.0:3000');
 });
-
-
-// returns a number 1-6 based on the assigned requestType.
+// returns a number 1-7 based on the assigned requestType.
 async function qualifyRequestType(queryString) {
   const response = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: `View the query. Scan for associated keywords and analyze user sentiment. Respond with the appropriate choice, represented only by the associated number.
-      1: eodRequest (Historical stock prices over time) - (keywords/themes: stock price, historical, over a range, performed) (Potential Arguments: from-to time range, stock ticker symbol or stock name)
-      2: realTimeRequest (Current prices of one stock) - (keywords/themes: live, current, right now, stock price) (Potential Arguments: stock ticker symbol or stock name) 
-      3: fundamentalsStockRequest (Company fundamentals, such as earnings statements, income statements, all sorts of filings for a specific company.) - (keywords/themes: fundamentals, income statement, earnings, balance sheet, dividend yield, etc) (Potential Arguments: stock ticker symbol or stock name)
-      4: fundamentalsCryptoRequest (Crypto fundamentals, such as market capitalization, trading volume, max supply, and more metrics specifically related to a cryptocurrency.) - (keywords/themes: fundamentals, cryptocurrency, BTC, ETH, Ripple, Litecoin, Bitcoin, Avalanche) (Potential Arguments: cryptocurrency symbol or name)
-      5: bulkRequest (multiple stocks, or whole market data for current EOD, or for historical day.) - (keywords/themes: stock prices, historical, compare, each other, etc) (Potential Arguments: Multiple stock symbols, date)
-      6: macroRequest (Macroeconomic indicators of countries, all sorts of macroeconomic indicators) - (keywords/themes: country, gdp, growth, annual, consumer, ppi, cpi, gni, life expectancy, co2 emissions, unemployment, real interest rate, population, inflation, net trades, net migration.) (Potential Arguments: country, indicator)
+      prompt: `
+      Instructions: View this query, analyze the intent behind it, and select from a list of options that best reflects the user's intent based on the query.
+      Query: ${queryString}
+      Options:
+      Option 1 (intraday): Intraday Historical Prices over a range of time. If the user is asking for a list of prices over a range of time on a specific stock.
+      Option 2 (fundamentals-stock): Fundamentals for a stock. If user is using the word fundamentals, or wants to know specifics of an organization like financials of a specific quarter, that is found here.
+      Option 3 (real-time): For current prices of stocks at the moment they're asked about. If user uses word like "current price" it is likely asking for this category.
+      Option 4 (calendar/earnings): If the user uses the word earnings and gives a time range, it is likely wanting this category.
+      Option 5 (eod-bulk-last-day): If the user asks for all stocks in the market over the last day. If user is asking for insights based on the market movements without specifiying a specific stock or time range, it is likely this category.
+      Option 6 (macro-indicators): If the user is asking for any indicators that would give insights about macroeconomic trends, such as CPI or other macroeconomic datapoints.
+      Option 7 (fundamentals-crypto): Fundamentals for a cryptocurrency. if the user is asking for info on a cryptocurrency or uses the word crypto or cryptocurrency, choose this category.
+      Output: choose a number 1-9 representing the option. output only the number.
       `,
       max_tokens: 3000,
       temperature: .5,
@@ -80,14 +83,14 @@ async function qualifyRequestType(queryString) {
 } 
 // maps possible requestTypes to an array of associated functions for callback. functions are below.
 const requestFunctions = {
- 1: eodRequest,
- 2: realTimeRequest,
- 3: fundamentalsStockRequest,
- 4: fundamentalsCryptoRequest,
- 5: bulkRequest,
- 6: macroRequest
+  1: eodRequest,
+  2: fundamentalsStockRequest,
+  3: realTimeRequest,
+  4: earningsRequest,
+  5: bulkRequest,
+  6: macroRequest,
+  7: fundamentalsCryptoRequest,
 }
-
 // overall workflow. Decides which sub-workflow to execute, executes it, then returns the response.
 async function api_search(queryString, callback) {
   console.log("api_search called with queryString:", queryString);
@@ -103,7 +106,6 @@ async function api_search(queryString, callback) {
     console.log("Invalid request type:", intRequest);
   }
 }
-
 
 // all the possible requestType workflows
   // EOD Historical - Complete -  Not Tested
@@ -239,7 +241,81 @@ async function api_search(queryString, callback) {
       return response.data.choices[0].text
   }
   }
-  
+
+  // Earnings Historical - Complete - Not Tested
+  async function earningsRequest(queryString){
+    // workflow Function
+  var currentTime = new Date();
+  var extractedInfo = await extractInfo(queryString);
+  console.log("")
+  var apiLink = await createApiLink(extractedInfo);
+  var apiCallData = await apiCall(apiLink);
+  var summarizedData = await summarizeData(apiCallData);
+  console.log(`Data Returned: ${summarizedData}`);
+  // extractInfo function
+  async function extractInfo(queryString) {
+      const extractedInfo = await openai.createCompletion({
+          model: "text-davinci-003",
+          prompt: `
+          Extract the datapoints in this query. 
+          Respond in this format: 
+          stockName: extractedStockTicker, 
+          fromDate: fromDate in YYYY-MM-DD
+          toDate: todate in YYYY-MM-DD
+          Defaults if N/A: stockName: AAPL, fromDate: ${currentTime} minus one week. ToDate: ${currentTime}
+          Query: ${queryString}`,
+          max_tokens: 3000,
+          temperature: .5,
+          stop: "/n",
+      });
+      return extractedInfo.data.choices[0].text;
+  }
+  // createApiLink function
+  async function createApiLink(extractedInfo) {
+      const apiLink = await openai.createCompletion({
+          model: "text-davinci-003",
+          prompt: `
+          Follow this workflow:
+          1. Replace the variables in this link with the variables that were passed in.
+          2. All variables passed in this link should be, stockName, fromDate, toDate. 
+          Link: https://www.eodhistoricaldata.com/api/earnings/calendar/stockName.US?api_token=63a2477acc2587.58203009&fmt=json&from=fromDate&to=toDate
+          Variables: ${extractedInfo}`,
+          max_tokens: 3000,
+          temperature: .5,
+          stop: "/n",
+      });
+      return apiLink.data.choices[0].text;
+  }
+  // apiCall function
+  async function apiCall(apiLink) {
+      const response = await fetch(apiLink);
+      return response.json();
+  }
+  // summarizeData function
+  async function summarizeData(apiCallData, queryString) {
+      const apiCallDataString = json.stringify(apiCallData)
+      const response = await openai.createCompletion({
+          model: "text-davinci-003",
+          prompt: `
+          Craft a brief response and summary of this data. 
+          Make values properly formatted with decimals and commas.
+          Answer the question using the data.
+          Data: ${apiCallDataString}
+          Question: ${queryString}
+          Response:`,
+          max_tokens: 3000,
+          temperature: .5,
+          stop: "/n",
+      })
+      return response.data.choices[0].text
+  }
+  }
+
+  // Stock Fundamentals - Not Complete & Nuanced - Not Tested
+  async function fundamentalsStockRequest(queryString){
+
+  }
+
   // bulkStocks - Complete & Nuanced - Not Tested
   async function bulkRequest(queryString){
     // Overall Workflow
@@ -520,9 +596,5 @@ async function api_search(queryString, callback) {
       })
       return response.data.choices[0].text
   }
-  }
-  
-  // Stock Fundamentals - Not Complete & Nuanced - Not Tested
-  async function fundamentalsStockRequest(queryString){
   }
   
