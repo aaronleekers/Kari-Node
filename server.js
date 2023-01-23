@@ -108,7 +108,7 @@ async function api_search(queryString) {
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 
     var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 
     console.log("stock & Time extracted!", extractedStock, extractedTimeRange); 
-    var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS:
+    var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
     console.log("Making API call now!"); // STEP 3
     const apiCallData = await apiCall(apiLink); // STEP 3.5 
@@ -147,15 +147,15 @@ async function api_search(queryString) {
         If there are no specific dates, see below:
         Make toTime = ${year}-${month}-${day}. This is the current time.
         Vague Time References to match: 
-        Over the last 5 years, make fromTime = ${year}-${month}-${day} minus 5 years.
-        Over the last 4 years, make fromTime = ${year}-${month}-${day} minus 4 years.
-        Over the last 3 years, make fromTime = ${year}-${month}-${day} minus 3 years.
-        Over the last 2 years, make fromTime = ${year}-${month}-${day} minus 2 years.
-        Over the last year, make fromTime = ${year}-${month}-${day} minus 1 year.
-        Over the last quarter, make fromTime = ${year}-${month}-${day} minus 3 months.
-        Over the last month, make fromTime = ${year}-${month}-${day} minus 1 month.
-        Over the last week, make fromTIme = ${year}-${month}-${day} minus 1 week.
-        Over the last day, make fromTime = ${year}-${month}-${day} minus 1 day.
+        "Over the last 5 years", make fromTime = ${year}-${month}-${day} less 5 years.
+        "Over the last 4 years", make fromTime = ${year}-${month}-${day} less 4 years.
+        "Over the last 3 years", make fromTime = ${year}-${month}-${day} less 3 years.
+        "Over the last 2 years", make fromTime = ${year}-${month}-${day} less 2 years.
+        "Over the last year", make fromTime = ${year}-${month}-${day} less 1 year.
+        "Over the last quarter", make fromTime = ${year}-${month}-${day} less 3 months.
+        "Over the last month", make fromTime = ${year}-${month}-${day} less 1 month.
+        "Over the last week", make fromTIme = ${year}-${month}-${day} less 1 week.
+        "Over the last day", make fromTime = ${year}-${month}-${day} less 1 day.
 
         For time ranges in between these times, subtract from currentTime accordingly. fromTime will equal either the chosen time based on the input, or the given one by input. toTime will equal either curren time, or one given by input.
         Input: ${queryString}
