@@ -107,7 +107,8 @@ async function api_search(queryString) {
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
     var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
-    var correctedTimeRange = await correctTimeRange(extractedTimeRange); // STEP 1.7 // TESTING TOKENS: 
+    var timeRangeCorrectOrNot = await qualifyTimeRangeCorrection(queryString, year, month, day, extractedTimeRange) 
+    var correctedTimeRange = await correctTimeRange(timeRangeCorrectOrNot, extractedTimeRange); // STEP 1.7 // TESTING TOKENS: 
     console.log("stock & Time extracted!", extractedStock, correctedTimeRange); 
     var apiLink = await createApiLink(correctedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
@@ -140,6 +141,7 @@ async function api_search(queryString) {
       let month = date.getMonth() + 1;
       let year = date.getFullYear();
 
+
       const extractedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
@@ -157,24 +159,38 @@ async function api_search(queryString) {
       return extractedTimeRange.data.choices[0].text;
     }
 
+
+async function qualifyTimeRangeCorrection(year, month, day, queryString, extractedTimeRange) {
+  const qualifyTimeRangeCorrection = await openai.createCompletion({
+    model: "text-davinci-003",
+    prompt: `
+    View the queryString and the extractedTimeRange. 
+    Determine if the extracted date range corresponds to the date range suggsted in the queryString.
+    If there are no specific dates in queryString, toDate should be considered as ${year}-${month}-${day}.
+    Respond Yes it does or no it does not. Then return the prompt to GPT to modify the extractedTimeRange to match, 
+    tell it how it doesn't match, and give instructions for it to match.
+    queryString: ${queryString}
+    extractedTimeRange: ${extractedTimeRange}
+    `,
+    max_tokens: 2048,
+    stop: "/n"
+  })
+  return qualifyTimeRangeCorrection.data.choices[0].text;
+}
+      
     // correctTimeRange function
-    async function correctTimeRange(extractedTimeRange, queryString) {
-      const date = new Date();
-      let day = date.getDate();
-      let month = date.getMonth() + 1;
-      let year = date.getFullYear();
+    async function correctTimeRange(extractedTimeRange, queryString, day, month, year, timeRangeCorrectOrNot) {
 
       const correctedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        View the user input, and compare the extractedTimeRange. 
-        If the query string gives a specific time range, 
-        make sure that time range lines up with the extractedTimeRange, and modify it to match.
-        If the query string gives a vague time range, make sure that the toDate is changed to the current date, 
-        and the fromDate is modified to match the time range in the query.
-        If the dates line up to the time range declared in the user input, output the extractedTimeRange. 
+        There are three variables to review: extractedTimeRange, queryString, 
+        and a string that determines if the time range needs to be corrected or not.
+        Your job is to review the queryString and the correction instructions, and output the modified
+        extractedTimeRange.
         Output like: "fromdate = (fromDate) toDate = (toDate)
 
+        Modification instructions: ${timeRangeCorrectOrNot}
         The current date is ${year}-${month}-${day}
         extractedTimeRange: ${extractedTimeRange}
         queryString: ${queryString}
