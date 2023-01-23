@@ -159,16 +159,25 @@ async function api_search(queryString) {
 
     // correctTimeRange function
     async function correctTimeRange(extractedTimeRange, queryString) {
+      const date = new Date();
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
+      let year = date.getFullYear();
+
       const correctedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
         View the user input, and compare the extractedTimeRange. 
-        If the date lines up to the time range declared in the user input, output the extractedTimeRange. 
-        If it does not correspond, modify the time range so it does correspond by modifying the fromDate.
+        If the query string gives a specific time range, 
+        make sure that time range lines up with the extractedTimeRange, and modify it to match.
+        If the query string gives a vague time range, make sure that the toDate is changed to the current date, 
+        and the fromDate is modified to match the time range in the query.
+        If the dates line up to the time range declared in the user input, output the extractedTimeRange. 
         Output like: "fromdate = (fromDate) toDate = (toDate)
+
+        The current date is ${year}-${month}-${day}
         extractedTimeRange: ${extractedTimeRange}
         queryString: ${queryString}
-        
         `,
         max_tokens: 2048,
         temperature: .3,
