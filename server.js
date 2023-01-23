@@ -183,7 +183,9 @@ async function qualifyTimeRangeCorrection(year, month, day, queryString, extract
 
       const correctedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
-        prompt: `
+        prompt: ` 
+        The current date is ${year}-${month}-${day}
+
         There are three variables to review: extractedTimeRange, queryString, 
         and a string that determines if the time range needs to be corrected or not.
         Your job is to review the queryString and the correction instructions, and output the modified
@@ -191,7 +193,6 @@ async function qualifyTimeRangeCorrection(year, month, day, queryString, extract
         Output like: "fromdate = (fromDate) toDate = (toDate)
 
         Modification instructions: ${timeRangeCorrectOrNot}
-        The current date is ${year}-${month}-${day}
         extractedTimeRange: ${extractedTimeRange}
         queryString: ${queryString}
         `,
