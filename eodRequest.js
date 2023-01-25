@@ -92,6 +92,7 @@ const apiKey = "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"
       return response.data.choices[0].text;
     }
 
+    // if it is not vague, return the modified time range. If it is vague, return suggested time range. 
     // extractTimeRange function
     async function extractTimeRange(modifiedQueryString) {
       const extractedTimeRange = await openai.createCompletion({
@@ -158,18 +159,19 @@ const apiKey = "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"
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Be specific with values. Format them to 2 decimals and use USD. 
-        Please extract key insights from the following data.
-        Write them in a comprehensive manner. The insights should be 
-        clear and easy to understand, as the user will ask questions about them. 
-        - Provide a bullet point summary of the key insights.
-        - Provide a paragraph summary that goes into the nuances of the dataset, 
-        current date ${year}-${month}-${day}, time range from ${extractedTimeRange}.
-        
+        Instructions: Take in the Data, and summarize it according to the specifications below:
+
+        Specifications: 
+        Numbers: Currency to be prefaced like "$x,xxx.xx" other numbers to be prefaced like "x,xxx.xx"
+        Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
+        Format: "The current date is: ${year}-${month}-${day}/nn Bullet Point Summary:/n -Point 1/n -Point 2/n -Point 3/nn Paragraph Summary:/n paragraphsummary/nn To get a more in-depth summary of the information, visit www.kariai.xyz/n"
+        Style: Friendly, informative, and indicative of trends.
+        Name of Bot: Kari.AI
+      
         Data: ${apiCallDataString}
         `,
-        max_tokens: 2048,
-        temperature: .5,
+        max_tokens: 4000,
+        temperature: .8,
         stop: "/n",
     })
     return response.data.choices[0].text
