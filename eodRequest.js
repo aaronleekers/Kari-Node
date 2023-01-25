@@ -18,9 +18,7 @@ const apiKey = "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"
     console.log("extracting info!")
     var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
     console.log("extractedStock:",extractedStock);
-    var modifiedQueryString = await modifyQueryString(queryString);
-    console.log("modifiedQueryString:",modifiedQueryString);
-    var extractedTimeRange = await extractTimeRange(queryString, modifiedQueryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
+    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
     console.log("extractedTimeRange", extractedTimeRange);
     var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
     console.log("apiLink:",apiLink);
@@ -48,12 +46,19 @@ const apiKey = "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"
       return extractedStock.data.choices[0].text;
     }
 
-    // modifyQueeryString
-    async function modifyQueryString(queryString) {
+    // extractTimeRange function
+    async function extractTimeRange(queryString) {
       const date = new Date();
       let day = date.getDate();
       let month = date.getMonth() + 1;
       let year = date.getFullYear();
+
+      const lastYear = year - 1;
+      const lastQuarter = month - 3;
+      const lastMonth = month - 1;
+      const lastWeek = day - 7;
+      
+
 
       const response = await openai.createCompletion({
        model: "text-davinci-003", 
@@ -62,26 +67,21 @@ const apiKey = "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"
        Command: View the queryString (below), and reformat it to be more specific with the date range.
       
        Instructions: If there are two dates present, modify the queryString to display the dates like so: 
-       (get me historical performance for stockName "from YYYY-MM-DD to YYYY-MM-DD")
+       Output: extractedTimeRange: "fromDate: (fromDate), toDate: (toDate)"
+
+
        Instructions if there are not two dates present:
-       Make toDate = ${year}-${month}-${day}
-       Make fromDate = toDate minus the time range suggested in the prompt.
-       Output: modifiedQueryString: (Modified Query String)
+       Make fromDate = toDate minus the time range suggested in the prompt. 
+       Follow the ideal Inputs and outputs for accurate outputs.
+       Output: extractedTimeRange: "fromDate: (fromDate), toDate: (toDate)"
 
-       Ideal Inputs and outputs: 
-       (I: "How has TSLA performed over the last year?" O: "Get me information for TSLA from 2022-01-24 to ${year}-${month}-${day}") 
-       (I: "How has TSLA performed over the last quarter?" O: "Get me information for TSLA from 2022-10-24 to ${year}-${month}-${day}") 
-       (I: "How has TSLA performed over the last month?" O: "Get me information for TSLA from 2022-12-24 to ${year}-${month}-${day}") 
-       (I: "How has TSLA performed over the last week?" O: "Get me information for TSLA from 2023-01-17 to ${year}-${month}-${day}") 
-       (I: "How has TSLA performed over the last 3 days?" O: "Get me information for TSLA from 2023-01-21 to ${year}-${month}-${day}")
-       (I: "How has TSLA performed over the last 3 weeks?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
-       (I: "How has TSLA performed over the last 6 months?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
-       (I: "How has TSLA performed over the last 2 weeks?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
-       (I: "How has TSLA performed over the last 2 years?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
+
+       Ideal Inputs and outputs(Examples, use these to produce accurate outputs, modify fromDate as needed to match input time range.): 
+       (I: "How has TSLA performed over the last year?" O: "fromDate: ${lastYear}-${month}-${day}, toDate: ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last quarter?" O: "fromDate" ${lastYear}-${lastQuarter}-${day} toDate: ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last month?" O: "fromDate: ${lastYear}-${lastMonth}-${day}  toDate: ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last week?" O: "fromDate ${year}-${month}-${lastWeek} toDate: ${year}-${month}-${day}") 
  
-
-       Use analysis to decide the fromDate based on the currentDate and the suggested time Range.
-
        queryString: ${queryString}
        
        `,
@@ -92,27 +92,8 @@ const apiKey = "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"
       return response.data.choices[0].text;
     }
 
-    // if it is not vague, return the modified time range. If it is vague, return suggested time range. 
-    // extractTimeRange function
-    async function extractTimeRange(modifiedQueryString) {
-      const extractedTimeRange = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: `
-
-        Command: extract the time range from the modifiedQueryString.
-        Instructions: read the modifiedQueryString, and extract the date range (do not modify dates, only return the dates in the modifiedQueryString) in the format of: ("fromDate = YYYY-MM-DD", "toDate = YYYY-MM-DD")
- 
-        ModifiedQueryString: ${modifiedQueryString}
-        `,
-        max_tokens: 1024,
-        temperature: .2,
-        stop: "/n"
-      })
-      return extractedTimeRange.data.choices[0].text;
-    }
-
     // createApiLink function
-    async function createApiLink(correctedTimeRange, extractedStock) {
+    async function createApiLink(extractedTimeRange, extractedStock) {
       const date = new Date();
       let day = date.getDate();
       let month = date.getMonth() + 1;
@@ -163,7 +144,6 @@ const apiKey = "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"
         Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
         Format: "The current date is: ${year}-${month}-${day}/nn Bullet Point Summary:/n -Point 1/n -Point 2/n -Point 3/nn Paragraph Summary:/n paragraphsummary/nn To get a more in-depth summary of the information, visit www.kariai.xyz/n"
         Style: Friendly, informative, and indicative of trends.
-        Name of Bot: Kari.AI
       
         Data: ${apiCallDataString}
         `,
@@ -174,4 +154,5 @@ const apiKey = "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"
     return response.data.choices[0].text
     }
   }
+  
   module.exports = { eodRequest };
