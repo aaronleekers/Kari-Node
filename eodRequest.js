@@ -4,6 +4,11 @@ const { Configuration, OpenAIApi } = require('openai');
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
 
+// THE KIND OF QUESTIONS THIS THING SHOULD BE ABLE TO ANSWER
+// "How has the SPY performed over the last year?"
+// "How has Microsoft performed between jan 2019 and jan 2020?"
+// "Get me historical performance for SPY over the last week"
+
 // openAI auth
   const configuration = new Configuration({
     orgId: orgId,
@@ -13,19 +18,20 @@ const apiKey = "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"
 
   // EOD Historical - Complete - Tested - 5 Steps 
   async function eodRequest(queryString){
+
     // workflow Function
     console.log("extracting info!")
-    var extractedStock = await extractStock(queryString); // STEP 1 // TESTING TOKENS: 1(AAPL) 2(TSLA) 3(JNJ)
+      var extractedStock = await extractStock(queryString);
     console.log("extractedStock:",extractedStock);
-    var extractedTimeRange = await extractTimeRange(queryString); // STEP 1.5 // TESTING TOKENS: 1(y) 2(q) 3(m) 4(w)
+      var extractedTimeRange = await extractTimeRange(queryString); 
     console.log("extractedTimeRange", extractedTimeRange);
-    var apiLink = await createApiLink(extractedTimeRange, extractedStock); // STEP 2 // TESTING TOKENS: I
+      var apiLink = await createApiLink(extractedTimeRange, extractedStock); 
     console.log("apiLink:",apiLink);
-    console.log("Making API call now!"); // STEP 3
-    const apiCallData = await apiCall(apiLink); // STEP 3.5 
-    const summarizedData = await summarizeData(apiCallData); // STEP 4 // TESTING TOKENS: 
+    console.log("Making API call now!"); 
+      const apiCallData = await apiCall(apiLink); 
+      const summarizedData = await summarizeData(apiCallData); 
     console.log(`Data Returned: ${summarizedData}`);
-    return summarizedData; // STEP 5 // FINAL
+      return summarizedData; // STEP 5 // FINAL
 
     // extractStock function
     async function extractStock(queryString) {
@@ -91,10 +97,6 @@ const apiKey = "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"
     }
     // createApiLink function
     async function createApiLink(extractedTimeRange, extractedStock) {
-      const date = new Date();
-      let day = date.getDate();
-      let month = date.getMonth() + 1;
-      let year = date.getFullYear();
     const apiLink = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
@@ -125,7 +127,7 @@ const apiKey = "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"
     }
     }
     // summarizeData function
-    async function summarizeData(apiCallData) {
+    async function summarizeData(apiCallData, extractedStock) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const date = new Date();
     let day = date.getDate();
@@ -139,8 +141,9 @@ const apiKey = "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"
         Specifications: 
         Numbers: Currency to be prefaced like "$x,xxx.xx" other numbers to be prefaced like "x,xxx.xx"
         Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
-        Format: "The current date is: ${year}-${month}-${day}. Bullet Point Summary: Point 1, Point 2, Point 3. Paragraph Summary: paragraphsummary.  To get a more in-depth summary of the information, visit www.kariai.xyz"
+        Format: "The current date is: ${year}-${month}-${day}. You requested historical information on ${extractedStock}. Bullet Point Summary: Point 1, Point 2, Point 3. Paragraph Summary: paragraphsummary.  To get a more in-depth summary of the information, visit www.kariai.xyz"
         Style: Friendly, informative, and indicative of trends.
+        Tip: If there is no data in the string, don't just make up data, return the fact that the data is empty.
       
         Data: ${apiCallDataString}
         `,
