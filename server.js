@@ -4,7 +4,7 @@ const url = require('url');
 const { Configuration, OpenAIApi } = require('openai');
 const { create } = require('domain');
 const axios = require('axios');
-const { eodRequest } = require('functions/eodRequest')
+const { eodRequest } = require('functions/eodRequest.js')
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
 
