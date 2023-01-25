@@ -100,7 +100,7 @@ const apiKey = "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"
         prompt: `
 
         Command: extract the time range from the modifiedQueryString.
-        Instructions: read the modifiedQueryString, and output the date range in the format of: ("fromDate = YYYY-MM-DD", "toDate = YYYY-MM-DD")
+        Instructions: read the modifiedQueryString, and extract the date range (do not modify dates, only return the dates in the modifiedQueryString) in the format of: ("fromDate = YYYY-MM-DD", "toDate = YYYY-MM-DD")
  
         ModifiedQueryString: ${modifiedQueryString}
         `,
