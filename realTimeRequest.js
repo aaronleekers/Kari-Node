@@ -74,23 +74,31 @@ const apiKey = "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"
   }
   
   // summarizeData function
-    async function summarizeData(apiCallData) {
-      const apiCallDataString = JSON.stringify(apiCallData)
-      const response = await openai.createCompletion({
-          model: "text-davinci-003",
-          prompt: `
-          Instructions: Parse the data, 
-          Summarize the insights.
-          The user will ask questions about it,
-          so make sure it is comprehensive.
-          Data: ${apiCallDataString}
-          Response:`,
-          max_tokens: 3000,
-          temperature: .5,
-          stop: "/n",
-      })
-      return response.data.choices[0].text
+  async function summarizeData(apiCallData) {
+    const apiCallDataString = JSON.stringify(apiCallData)
+    const date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Instructions: Take in the Data, and summarize it according to the specifications below:
+
+        Specifications: 
+        Numbers: Currency to be prefaced like "$x,xxx.xx" other numbers to be prefaced like "x,xxx.xx"
+        Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
+        Format: "The current date is: ${year}-${month}-${day}. Bullet Point Summary: Point 1, Point 2, Point 3. Paragraph Summary: paragraphsummary.  To get a more in-depth summary of the information, visit www.kariai.xyz"
+        Style: Friendly, informative, and indicative of trends.
+      
+        Data: ${apiCallDataString}
+        `,
+        max_tokens: 3000,
+        temperature: .8,
+        stop: "/n",
+    })
+    return response.data.choices[0].text
     }
-    }
+  }
     
     module.exports = { realTimeRequest };

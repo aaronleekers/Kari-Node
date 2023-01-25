@@ -82,12 +82,12 @@ async function qualifyRequestType(queryString) {
 } 
 // maps possible requestTypes to an array of associated functions for callback. functions are below.
 const requestFunctions = {
- 1: eodRequest, // NOT COMPLETE
- 2: realTimeRequest, // NOT COMPLETE 
- 3: fundamentalsStockRequest, // NOT COMPLETE
- 4: fundamentalsCryptoRequest, // NOT COMPLETE
- 5: bulkRequest, // NOT COMPELTE
- 6: macroRequest, // NOT COMPLETE 
+ 1: eodRequest, // COMPLETE
+ 2: realTimeRequest, // NOT COMPLETE // NEXT TO BE CHECKED OFF
+ 3: fundamentalsStockRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 6
+ 4: fundamentalsCryptoRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 2
+ 5: bulkRequest, // NOT COMPELTE // TO BE CHECKED OFF AFTER 4
+ 6: macroRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 5
 }
 
 // overall workflow. Decides which sub-workflow to execute, executes it, then returns the response.
