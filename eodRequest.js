@@ -73,7 +73,12 @@ const apiKey = "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"
        (I: "How has TSLA performed over the last quarter?" O: "Get me information for TSLA from 2022-10-24 to ${year}-${month}-${day}") 
        (I: "How has TSLA performed over the last month?" O: "Get me information for TSLA from 2022-12-24 to ${year}-${month}-${day}") 
        (I: "How has TSLA performed over the last week?" O: "Get me information for TSLA from 2023-01-17 to ${year}-${month}-${day}") 
-       (I: "How has TSLA performed over the last day?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last 3 days?" O: "Get me information for TSLA from 2023-01-21 to ${year}-${month}-${day}")
+       (I: "How has TSLA performed over the last 3 weeks?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last 6 months?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last 2 weeks?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last 2 years?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
+ 
 
        Use analysis to decide the fromDate based on the currentDate and the suggested time Range.
 
