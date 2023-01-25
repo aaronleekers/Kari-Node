@@ -68,7 +68,17 @@ const apiKey = "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"
        Make fromDate = toDate minus the time range suggested in the prompt.
        Output: modifiedQueryString: (Modified Query String)
 
+       Ideal Inputs and outputs: 
+       (I: "How has TSLA performed over the last year?" O: "Get me information for TSLA from 2022-01-24 to ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last quarter?" O: "Get me information for TSLA from 2022-10-24 to ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last month?" O: "Get me information for TSLA from 2022-12-24 to ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last week?" O: "Get me information for TSLA from 2023-01-17 to ${year}-${month}-${day}") 
+       (I: "How has TSLA performed over the last day?" O: "Get me information for TSLA from 2023-01-23 to ${year}-${month}-${day}") 
+
+       Use analysis to decide the fromDate based on the currentDate and the suggested time Range.
+
        queryString: ${queryString}
+       
        `,
        max_tokens: 3000,
        temperature: .3,
