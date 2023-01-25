@@ -1,7 +1,6 @@
 const http = require('http');
 const https = require("https");
 const url = require('url');
-const querystring = require('querystring');
 const { Configuration, OpenAIApi } = require('openai');
 const { create } = require('domain');
 const axios = require('axios');
@@ -148,50 +147,41 @@ async function api_search(queryString) {
        model: "text-davinci-003", 
        prompt: `
 
-       "Please modify the following queryString to correctly calculate the fromDate 
-       based on the vague time range specified. Use the provided table to accurately 
-       convert the vague time range into a specific from date and make sure that the 
-       to date is the current date. Double check your work to ensure accuracy before 
-       outputting the modified queryString."
+       Command: View the queryString (below), and reformat it to be more specific with the date range.
       
-       Current Date: ${year}-${month}-${day}.
+       Instructions: If there are two dates present, modify the queryString to display the dates like so: 
+       (get me historical performance for stockName "from YYYY-MM-DD to YYYY-MM-DD")
+       Instructions if there are not two dates present: set the toDate as ${year}-${month}-${day}, 
+       which is the current day. Subtract the time interval suggested in the prompt to get to the fromDate.
+       Ensure that the date range corresponds to the length of time suggested in the prompt. 
 
-       Table:
-       "( Input: :How has (stockName) done over the last day?" Output: Get me historical performance for stockName from (Current DATE minus one day) to (Current DATE)"
-       "( Input: :How has (stockName) done over the last week?" Output: Get me historical performance for stockName from (Current DATE minus one week) to (Current DATE)"
-       "( Input: :How has (stockName) done over the last month?" Output: Get me historical performance for stockName from (Current DATE minus one month) to (Current DATE)"
-       "( Input: :How has (stockName) done over the last quarter?" Output: Get me historical performance for stockName from (Current DATE minus one quarter) to (Current DATE)"
-       "( Input: :How has (stockName) done over the last year?" Output: Get me historical performance for stockName from (Current DATE minus one year) to (Current DATE)"
+       Output: modifiedQueryString: (Modified Query String)
 
        queryString: ${queryString}
-       modified queryString: 
        `,
        max_tokens: 3000,
+       temperature: .3,
        stop: "/n"
       })
       return response.data.choices[0].text;
     }
 
     // extractTimeRange function
-    async function extractTimeRange(modifiedQueryString, queryString) {
-      const date = new Date();
-      let day = date.getDate();
-      let month = date.getMonth() + 1;
-      let year = date.getFullYear();
-
-
+    async function extractTimeRange(modifiedQueryString) {
       const extractedTimeRange = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: `
-        Please understand the current date: It is ${year}-${month}-${day}.
+
+        Command: extract the time range from the modifiedQueryString.
+        Instructions: read the modifiedQueryString, and output the date range in the format of: (fromDate = YYYY-MM-DD, toDate = YYYY-MM-DD)
       
         Please review the modifiedQueryString and compare it against the queryString. 
         The modifiedQueryString needs to be modified to correspond to the time range suggested in the queryString.
 
         ModifiedQueryString: ${modifiedQueryString}
-        queryString: ${queryString}
         `,
         max_tokens: 2048,
+        temperature: .3,
         stop: "/n"
       })
       return extractedTimeRange.data.choices[0].text;
@@ -209,9 +199,8 @@ async function api_search(queryString) {
         Please help me create a link to access financial data for a specific stock by replacing the stock name, from date, to date, and period in the following format:
         apiLink: https://www.eodhistoricaldata.com/api/eod/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json&from=(fromDate)&to=(toDate)&period=(period)
         - The stock name (stockName) should be replaced with the variable ${extractedStock}.
-        - The from date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${correctedTimeRange}.
-        - The to date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${correctedTimeRange}.
-        - If there is no end date (toDate), use ${year}-${month}-${day}
+        - The from date (fromDate) should be in the format YYYY-MM-DD and replaced with the first date found in the variable ${extractedTimeRange}.
+        - The to date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
         - The period should be determined by the length of the range. If the range is one year or longer, make it m. If it is 3 months or longer, make it w. if it is less, make it d.
         - Respond in the format of: "apiLink: (apilink)"
         - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT. DO NOT RESPOND WITH "Answer:". The only prefix before the link should be apiLink:
