@@ -1,7 +1,6 @@
 const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 
-  
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
 
@@ -11,8 +10,8 @@ const apiKey = "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"
     apiKey: apiKey,
 });
   const openai = new OpenAIApi(configuration);
-  
-  // EOD Historical - Not Complete -  Not Tested - 5 Steps 
+
+  // EOD Historical - Complete - Tested - 5 Steps 
   async function eodRequest(queryString){
     // workflow Function
     console.log("extracting info!")
@@ -45,7 +44,6 @@ const apiKey = "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"
       })
       return extractedStock.data.choices[0].text;
     }
-
     // extractTimeRange function
     async function extractTimeRange(queryString) {
       const date = new Date();
@@ -91,7 +89,6 @@ const apiKey = "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"
       })
       return response.data.choices[0].text;
     }
-
     // createApiLink function
     async function createApiLink(extractedTimeRange, extractedStock) {
       const date = new Date();
@@ -128,7 +125,7 @@ const apiKey = "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"
     }
     }
     // summarizeData function
-    async function summarizeData(apiCallData, extractedTimeRange) {
+    async function summarizeData(apiCallData) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const date = new Date();
     let day = date.getDate();
@@ -142,7 +139,7 @@ const apiKey = "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"
         Specifications: 
         Numbers: Currency to be prefaced like "$x,xxx.xx" other numbers to be prefaced like "x,xxx.xx"
         Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
-        Format: "The current date is: ${year}-${month}-${day}/nn Bullet Point Summary:/n -Point 1/n -Point 2/n -Point 3/nn Paragraph Summary:/n paragraphsummary/nn To get a more in-depth summary of the information, visit www.kariai.xyz/n"
+        Format: "The current date is: ${year}-${month}-${day}. Bullet Point Summary: Point 1, Point 2, Point 3. Paragraph Summary: paragraphsummary.  To get a more in-depth summary of the information, visit www.kariai.xyz"
         Style: Friendly, informative, and indicative of trends.
       
         Data: ${apiCallDataString}
@@ -154,5 +151,5 @@ const apiKey = "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"
     return response.data.choices[0].text
     }
   }
-  
+
   module.exports = { eodRequest };
