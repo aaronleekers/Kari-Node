@@ -38,6 +38,8 @@ const apiKey = "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"
       Instructions: View the queryString, and extract the cryptocurrency from it.
       Modify cryptocurrrency to match symbol. For example, Bitcoin would be outputted as BTC, Ripple would be XRP. 
       If there is already a crypto symbol, output the symbol in the format like ("Cryptocurrency: SYMBOL").
+      
+      QueryString: ${queryString}
       `,
       max_tokens: 1024,
       stop: "/n",
