@@ -7,8 +7,8 @@ const apiKey = "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"
 
 // What kind of questions this should be able to answer
 // What are the fundamentals of bitcoin?
-// What is the max supply of Bitcoin?
-// What is the max supply of Ethereum?
+// What is the max supply of Avalanche?
+// What is the market dominance of Ethereum?
 
 // openAI auth
   const configuration = new Configuration({
@@ -17,7 +17,7 @@ const apiKey = "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"
 });
   const openai = new OpenAIApi(configuration);
 
-  // cryptoFundamentals - Not Complete - Not Tested 
+  // cryptoFundamentalsRequest
   async function fundamentalsCryptoRequest(queryString){
   // workflow
   var extractedCrypto = await extractCrypto(queryString);
