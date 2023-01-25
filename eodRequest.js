@@ -100,15 +100,12 @@ const apiKey = "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"
         prompt: `
 
         Command: extract the time range from the modifiedQueryString.
-        Instructions: read the modifiedQueryString, and output the date range in the format of: (fromDate = YYYY-MM-DD, toDate = YYYY-MM-DD)
-      
-        Please review the modifiedQueryString and compare it against the queryString. 
-        The modifiedQueryString needs to be modified to correspond to the time range suggested in the queryString.
-
+        Instructions: read the modifiedQueryString, and output the date range in the format of: ("fromDate = YYYY-MM-DD", "toDate = YYYY-MM-DD")
+ 
         ModifiedQueryString: ${modifiedQueryString}
         `,
-        max_tokens: 3000,
-        temperature: .3,
+        max_tokens: 1024,
+        temperature: .2,
         stop: "/n"
       })
       return extractedTimeRange.data.choices[0].text;
