@@ -134,3 +134,5 @@ const apiKey = "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"
     return response.data.choices[0].text
     } 
   }
+
+  module.exports = { bulkRequest }
