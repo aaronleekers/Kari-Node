@@ -5,6 +5,11 @@ const { Configuration, OpenAIApi } = require('openai');
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
 
+// What kind of questions this should be able to answer
+// What are the fundamentals of bitcoin?
+// What is the max supply of Bitcoin?
+// What is the max supply of Ethereum?
+
 // openAI auth
   const configuration = new Configuration({
     orgId: orgId,
@@ -12,83 +17,90 @@ const apiKey = "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"
 });
   const openai = new OpenAIApi(configuration);
 
-
-  // cryptoFundamentals - Complete - Not Tested
+  // cryptoFundamentals - Not Complete - Not Tested 
   async function fundamentalsCryptoRequest(queryString){
-    // workflow Function
-  var extractedInfo = await extractInfo(queryString);
-  console.log("")
-  var apiLink = await createApiLink(extractedInfo);
+  // workflow
+  var extractedCrypto = await extractCrypto(queryString);
+  console.log("Crypto Extracted:",extractedCrypto);
+  var apiLink = await createApiLink(extractedCrypto);
+  console.log(apiLink)
   var apiCallData = await apiCall(apiLink);
   var summarizedData = await summarizeData(apiCallData);
-  console.log(`Data Returned: ${summarizedData}`);
-  // extractInfo function
-  async function extractInfo(queryString) {
-      const extractedInfo = await openai.createCompletion({
-          model: "text-davinci-003",
-          prompt: `
-          Extract the datapoints in this query. 
-          Respond in this format: 
-          cryptoCurrency: extractedCryptoCurrencyPair, 
-          cryptoTradingPair: extractedTradingPair
-          Defaults if N/A: cryptoCurrency: BTC, cryptoTradingPair: USD
-          Query: ${queryString}`,
-          max_tokens: 3000,
-          temperature: .5,
-          stop: "/n",
-      });
-      return extractedInfo.data.choices[0].text;
+  console.log(`Data returned: ${summarizedData}`);
+  return summarizedData;
+
+  // extractCrypto function
+  async function extractCrypto(queryString){
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt:
+      `
+      Instructions: View the queryString, and extract the cryptocurrency from it.
+      Modify cryptocurrrency to match symbol. For example, Bitcoin would be outputted as BTC, Ripple would be XRP. 
+      If there is already a crypto symbol, output the symbol in the format like ("Cryptocurrency: SYMBOL").
+      `,
+      max_tokens: 1024,
+      stop: "/n",
+    });
+
+    return response.data.choices[0].text;
   }
   // createApiLink function
-  async function createApiLink(extractedInfo) {
-      const apiLink = await openai.createCompletion({
-          model: "text-davinci-003",
-          prompt: `
-          Follow this workflow:
-            1. Replace the variables in this link with the variables that were passed in.
-            2. All variables passed in this link should be, cryptoCurrency, extractedTradingPair.
-            Link: https://www.eodhistoricaldata.com/api/fundamentals/cryptoCurrency-extractedTradingPair.CC?api_token=63a2477acc2587.58203009&fmt=json
-          Variables: ${extractedInfo}`,
-          max_tokens: 3000,
-          temperature: .5,
-          stop: "/n",
-      });
-      return apiLink.data.choices[0].text;
-  }
-  // apiCall function
-  async function apiCall(apiLink) {
-    return new Promise((resolve, reject) => {
-      https.get(apiLink, (res) => {
-        let data = '';
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-        res.on('end', () => {
-          resolve(JSON.parse(data));
-        });
-      }).on('error', (err) => {
-        reject(err);
-      });
+  async function createApiLink(extractedCrypto){
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt:
+      `
+      Instructions: Replaces the variable cryptoCurrency with the variable extractedCrypto.
+      Output: apiLink: https://www.eodhistoricaldata.com/api/fundamentals/cryptoCurrency-USD.CC?api_token=63a2477acc2587.58203009&fmt=json
+      - Do not respond with anything else. Do not repsond with "Answer:, or Output:". Do not do it. DONT DO IT. DO NOT RESPOND WITH "Answer:". The only prefix before the link should be apiLink:
+      extractedCrypto: ${extractedCrypto}
+      `,
+      max_tokens: 1024,
+      stop: "/n",
     });
+    
+    return response.data.choices[0].text;
   }
+   // apiCall function
+   async function apiCall(apiLink) {
+    const cleanedLink = await cleanLink(apiLink);
+    const response = await axios.get(cleanedLink);
+    return response.data;
+  
+    async function cleanLink(apiLink){
+      var cleanedLink = apiLink.replace("apiLink: ","");
+      return cleanedLink;
+    }
+  }
+
   // summarizeData function
-  async function summarizeData(apiCallData, queryString) {
-      const apiCallDataString = json.stringify(apiCallData)
-      const response = await openai.createCompletion({
-          model: "text-davinci-003",
-          prompt: `
-          Craft a brief response and summary of this data. 
-          Make values properly formatted with decimals and commas.
-          Answer the question using the data.
-          Data: ${apiCallDataString}
-          Question: ${queryString}
-          Response:`,
-          max_tokens: 3000,
-          temperature: .5,
-          stop: "/n",
-      })
-      return response.data.choices[0].text
-  }
+  async function summarizeData(apiCallData) {
+    const apiCallDataString = JSON.stringify(apiCallData)
+    const date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Instructions: Take in the Data, and summarize it according to the specifications below:
+
+        Specifications: 
+        Numbers: Currency to be prefaced like "$x,xxx.xx" other numbers to be prefaced like "x,xxx.xx"
+        Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
+        Format: "Kari: Hi ChatGPT, I am Kari, a smart financial analyst. I am here to summarize the key insights of the information. Here it is: The current date is: ${year}-${month}-${day}. Bullet Point Summary: bulletpointsummary Paragraph Summary: paragraphsummary. Thanks for asking your question, to get a more in-depth summary of the information, visit www.kariai.xyz"
+        Style: Friendly, informative, and indicative of trends.
+        Tip: If there is no data in the string, don't just make up data, return the fact that the data is empty.
+
+        Data: ${apiCallDataString}
+        `,
+        max_tokens: 3000,
+        temperature: .5,
+        stop: "/n",
+    })
+    return response.data.choices[0].text
+    } 
   }
 
   module.exports = { fundamentalsCryptoRequest };
