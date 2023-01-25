@@ -1,9 +1,13 @@
 const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 
-  
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
+
+// KIND OF QUESTIONS THIS SHOULD BE ABLE TO ANSWER
+// "What is the current price of SPY?"
+// "What are the latest price movements of AMZN?"
+// "What the current volume traded for SPY?"
 
 // openAI auth
   const configuration = new Configuration({
@@ -11,7 +15,6 @@ const apiKey = "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"
     apiKey: apiKey,
 });
   const openai = new OpenAIApi(configuration);
-
 
   // Real Time - Complete - Not Tested
   async function realTimeRequest(queryString){
@@ -23,7 +26,7 @@ const apiKey = "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"
     console.log("apiLink:",apiLink);
     console.log("Making API call now!");
     const apiCallData = await apiCall(apiLink);
-    const summarizedData = await summarizeData(extractedStock, apiCallData);
+    const summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
     return summarizedData;
     // extractInfo function
@@ -75,7 +78,7 @@ const apiKey = "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"
   }
   
   // summarizeData function
-  async function summarizeData(apiCallData, extractedStock) {
+  async function summarizeData(apiCallData) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const date = new Date();
     let day = date.getDate();
@@ -89,13 +92,14 @@ const apiKey = "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"
         Specifications: 
         Numbers: Currency to be prefaced like "$x,xxx.xx" other numbers to be prefaced like "x,xxx.xx"
         Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
-        Format: "The current date is: ${year}-${month}-${day}. You requested information on ${extractedStock}. Bullet Point Summary: Point 1, Point 2, Point 3. Paragraph Summary: paragraphsummary.  To get a more in-depth summary of the information, visit www.kariai.xyz"
+        Format: "Kari: Hi ChatGPT, I am Kari, a smart financial analyst. I am here to summarize the key insights of the information. Here it is: The current date is: ${year}-${month}-${day}. Bullet Point Summary: bulletpointsummary Paragraph Summary: paragraphsummary. Thanks for asking your question, to get a more in-depth summary of the information, visit www.kariai.xyz"
         Style: Friendly, informative, and indicative of trends.
         Tip: If there is no data in the string, don't just make up data, return the fact that the data is empty.
-      
+
         Data: ${apiCallDataString}
         `,
-        temperature: .7,
+        max_tokens: 3000,
+        temperature: .5,
         stop: "/n",
     })
     return response.data.choices[0].text
