@@ -127,7 +127,7 @@ const apiKey = "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"
     }
     }
     // summarizeData function
-    async function summarizeData(apiCallData, extractedStock) {
+    async function summarizeData(apiCallData, extractedStock, extractedTimeRange) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const date = new Date();
     let day = date.getDate();
@@ -141,11 +141,11 @@ const apiKey = "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"
         Specifications: 
         Numbers: Currency to be prefaced like "$x,xxx.xx" other numbers to be prefaced like "x,xxx.xx"
         Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
-        Format: "The current date is: ${year}-${month}-${day}. You requested historical information on ${extractedStock}. Bullet Point Summary: Point 1, Point 2, Point 3. Paragraph Summary: paragraphsummary.  To get a more in-depth summary of the information, visit www.kariai.xyz"
+        Format: "The current date is: ${year}-${month}-${day}. You requested historical information on ${extractedStock}. The time range you requested is ${extractedTimeRange} Bullet Point Summary: Point 1, Point 2, Point 3. Paragraph Summary: paragraphsummary.  To get a more in-depth summary of the information, visit www.kariai.xyz"
         Style: Friendly, informative, and indicative of trends.
         Tip: If there is no data in the string, don't just make up data, return the fact that the data is empty.
       
-        Data: ${apiCallDataString}
+        Data: ${apiCallDataString} 
         `,
         max_tokens: 3000,
         temperature: .8,
