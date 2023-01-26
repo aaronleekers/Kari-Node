@@ -127,7 +127,7 @@ const apiKey = "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"
 
         Data: ${apiCallDataString}
         `,
-        max_tokens: 3900,
+        max_tokens: 400,
         temperature: .5,
         stop: "/n",
     })
