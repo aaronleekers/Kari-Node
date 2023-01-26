@@ -23,7 +23,7 @@ const apiKey = "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"
     var country = await extractCountry(queryString);
     var indicator = await extractIndicator(queryString);
     console.log(country, indicator)
-    var apiLink = await createApiLink(extractedInfo);
+    var apiLink = await createApiLink(country, indicator);
     console.log(apiLink)
     var apiCallData = await apiCall(apiLink);
     console.log(apiCallData);
