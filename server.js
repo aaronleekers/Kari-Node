@@ -7,6 +7,21 @@ const { fundamentalsCryptoRequest } = require('./fundamentalsCryptoRequest');
 const { macroRequest } = require('./macroRequest');
 const { realTimeRequest } = require('./realTimeRequest');
 
+// What kind of questions this API can serve:
+// Compare the stocks TSLA, AAPL, MCD, SPY, and MSFT.
+// Compare Ford, General Motors, and Tesla's price performance on January 25, 2023.
+// Compare The S&P 500 ETF, Coca Cola, and McDonald's price performance on January 6, 2021.
+// What are the fundamentals of bitcoin?
+// What is the max supply of Avalanche?
+// What is the market dominance of Ethereum?
+// "How has the SPY performed over the last year?"
+// "How has Microsoft performed between jan 2019 and jan 2020?"
+// "Get me historical performance for SPY over the last week"
+// "What is the current price of SPY?"
+// "What are the latest price movements of AMZN?"
+// "What the current volume traded for SPY?"
+
+
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0";
 const apiKey = "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";
 
@@ -86,7 +101,7 @@ const requestFunctions = {
  2: realTimeRequest, // COMPLETE 
  3: fundamentalsStockRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 6
  4: fundamentalsCryptoRequest, // COMPLETE 
- 5: bulkRequest, // NOT COMPELTE // TO BE CHECKED OFF AFTER 4
+ 5: bulkRequest, // COMPELTE
  6: macroRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 5
 }
 

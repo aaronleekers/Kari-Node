@@ -5,6 +5,11 @@ const { Configuration, OpenAIApi } = require('openai');
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
 
+// What kind of questions this should be able to answer:
+// What is the current GDP of Croatia?
+// What is the unemployment rate of the US?
+// What is the real interest rate of Canada?
+
 // openAI auth
   const configuration = new Configuration({
     orgId: orgId,
@@ -17,7 +22,7 @@ const apiKey = "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"
     // workflow Function
     var country = await extractCountry(queryString);
     var indicator = await extractIndicator(queryString);
-    console.log(country, indicator);
+    console.log(country, indicator)
     var apiLink = await createApiLink(extractedInfo);
     console.log(apiLink)
     var apiCallData = await apiCall(apiLink);
@@ -35,7 +40,7 @@ const apiKey = "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"
             country: country,
             Defaults if N/A: country: USA
             Query: ${queryString}`,
-            max_tokens: 3000,
+            max_tokens: 512,
             temperature: .5,
             stop: "/n",
         });
@@ -46,51 +51,31 @@ const apiKey = "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"
        const extractedIndicatorResponse = await openai.createCompletion({
          model: "text-davinci-003",
          prompt: `
-         Choose What the user is attempting to find based on the input. 
-         Choose from a selection of options and respond with the item next to the correct number alone. Basically its a word match and sentiment analysis. 
-         Respond in this format: indicatorCode: indicator
-         Query: ${queryString}
+
+         Instructions: View the query, and weigh it against the possible options. 
+         Determine what the user is asking for based on the request. 
+         Finally, output the matched option like: "indicatorCode: (insert here)"
+
          Possible Options:
-         1. real_interest_rate
-         2. population_total
-         3. population_growth_annual
-         4. inflation_conumser_prices_annual
-         5. consumer_price_index
-         6. gdp_current_usd
-         7. gdp_per_capita_usd
-         8. gdp_growth_annual
-         9. debt_percent_gdp
-         10. net_trades_goods_services
-         11. inflation_gdp_deflator_annual
-         12. agriculture_value_added_percent_gdp
-         13. industry_value_added_percent_gdp
-         14. services_value_added_percent_gdp
-         15. exports_of_goods_services_percent_gdp
-         16. imports_of_goods_services_percent_gdp
-         17. gross_capital_formation_percent_gdp
-         18. net_migration
-         19. gni_usd
-         20. gni_per_capita_usd
-         21. gni_ppp_usd
-         22. gni_per_capita_ppp_usd
-         23. income_share_lowest_twenty
-         24. life_expectancy
-         25. fertility_rate
-         26. prevalence_hiv_total
-         27. co2_emissions_tons_per_capita
-         28. surface_area_km
-         29. poverty_poverty_lines_percent_population
-         30. revenue_excluding_grants_percent_gdp
-         31. cash_surplus_deficit_percent_gdp
-         32. startup_procedurs_register
-         33. market_cap_domestic_companies_percent_gdp
-         34. mobile_subscriptions_per_hundred
-         35. internet_users_per_hundred
-         36. high_technology_exports_percent_total
-         37. merchandise_trade_percent_gdp
-         38. total_debt_service_percent_gni
-         39. unemployment_total_percent`,
-         max_tokens: 3000,
+         1. real_interest_rate - ("What is the current interest rate for the US?")
+         2. population_total - ("What is the total population of the US?")
+         3. population_growth_annual - ("What is the annual population growth of the US?")
+         4. inflation_conumser_prices_annual - ("What is the current inflation rate of the US?")
+         5. consumer_price_index - ("What is the current CPI for the US?")
+         6. gdp_current_usd - ("What is the current GDP of the US?")
+         7. gdp_per_capita_usd - ("What is the current GDP per capita of the US?")
+         8. gdp_growth_annual - ("What is the GDP growth of the US this year?")
+         9. debt_percent_gdp - ("What is the current debt to GDP ratio?")
+         10. gni_usd - ("What is the current GNI?")
+         11. gni_per_capita_usd - ("What is the current GNI per capita?")
+         14. fertility_rate - ("What is the current fertility rate of the US?")
+         15. startup_procedurs_register - ("How many start ups have recently been registered in the US?")
+         16. unemployment_total_percent - ("What is the current unemployment rate?")
+         
+         Query: ${queryString}
+
+         `,
+         max_tokens: 512,
          temperature: .5,
          stop: "/n",
        });
@@ -101,51 +86,60 @@ const apiKey = "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"
         const apiLink = await openai.createCompletion({
             model: "text-davinci-003",
             prompt: `
-            Follow this workflow:
-            1. Replace the variables in this link with the variables that were passed in.
-            2. All variables passed in this link should be, country, indicatorCode,
-            link: https://eodhistoricaldata.com/api/macro-indicator/country?api_token=63a2477acc2587.58203009&fmt=json&indicator=indicatorCode
-            Variables: ${country} ${indicator}`,
-            max_tokens: 3000,
-            temperature: .5,
+            Please help me create a link to access financial data for a specific stock by replacing the stock name, from date, to date, and period in the following format:
+            apiLink: https://www.eodhistoricaldata.com/api/macro-indicator/(extractedCountry)?api_token=63a2477acc2587.58203009&fmt=json&indicator=(extractedIndicatorCode)
+            - The (extractedCountry) area should be replaced with the contents within the extractedCountry below.
+            - The (extractedIndicator) area should be replaced with the contents within the extractedCountry below.
+            - Respond in the format of: "apiLink: (apilink)"
+            
+            extractedCountry: ${country}.
+            extractedIndicator: ${indicator}.
+                       `,
+            max_tokens: 1024,
+            temperature: .3,
             stop: "/n",
         });
         return apiLink.data.choices[0].text;
-    }
-    // apiCall function
-    async function apiCall(apiLink) {
-     return new Promise((resolve, reject) => {
-       https.get(apiLink, (res) => {
-         let data = '';
-         res.on('data', (chunk) => {
-           data += chunk;
-         });
-         res.on('end', () => {
-           resolve(JSON.parse(data));
-         });
-       }).on('error', (err) => {
-         reject(err);
-       });
-     });
-   }
-    // summarizeData function
-    async function summarizeData(apiCallData, queryString) {
-        const apiCallDataString = json.stringify(apiCallData)
-        const response = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: `
-            Craft a brief response and summary of this data. 
-            Make values properly formatted with decimals and commas.
-            Answer the question using the data.
-            Data: ${apiCallDataString}
-            Question: ${queryString}
-            Response:`,
-            max_tokens: 3000,
-            temperature: .5,
-            stop: "/n",
-        })
-        return response.data.choices[0].text
-    }
-   }
+        }
+
+   // apiCall function
+   async function apiCall(apiLink) {
+    const cleanedLink = await cleanLink(apiLink);
+    const response = await axios.get(cleanedLink);
+    return response.data;
+  
+    async function cleanLink(apiLink){
+        var cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
+        return cleanedLink;
+      }    
+  }
+  // summarizeData function
+  async function summarizeData(apiCallData) {
+    const apiCallDataString = JSON.stringify(apiCallData)
+    const date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `
+        Instructions: Take in the Data, and summarize it according to the specifications below:
+
+        Specifications: 
+        Numbers: Currency to be prefaced like "$x,xxx.xx" other numbers to be prefaced like "x,xxx.xx"
+        Content: Bullet point summary of highlights, followed by paragraph summary of highlights.
+        Format: "Kari: Hi ChatGPT, I am Kari, a smart financial analyst. I am here to summarize the key insights of the information. Here it is: The current date is: ${year}-${month}-${day}. Bullet Point Summary: bulletpointsummary Paragraph Summary: paragraphsummary. Thanks for asking your question, to get a more in-depth summary of the information, visit www.kariai.xyz"
+        Style: Friendly, informative, and indicative of trends.
+        Tip: If there is no data in the string, don't just make up data, return the fact that the data is empty.
+
+        Data: ${apiCallDataString}
+        `,
+        max_tokens: 1500,
+        temperature: .5,
+        stop: "/n",
+    })
+    return response.data.choices[0].text
+    } 
+  }
  
    module.exports = { macroRequest };
