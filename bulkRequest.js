@@ -80,7 +80,7 @@ const apiKey = "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"
             Please help me create a link to access financial data for a specific stock by replacing the stock name, from date, to date, and period in the following format:
             apiLink: https://www.eodhistoricaldata.com/api/eod-bulk-last-day/US?api_token=63a2477acc2587.58203009&fmt=json&filter=extended&symbols=(extractedStocks)
             - The (extractedStocks) area should be replaced with the contents within extractedStocks below.
-            - If the extractedDate is not "N/A" add &date=(extractedDate) to the end of the link.
+            - If the extractedDate is not "N/A" add &date=(extractedDate) to the end of the link. Only add date to link if there is date present, otherwise add nothing.
             - Respond in the format of: "apiLink: (apilink)"
             - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT. DO NOT RESPOND WITH "Answer:". The only prefix before the link should be apiLink:
             
