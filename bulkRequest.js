@@ -82,7 +82,6 @@ const apiKey = "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"
             - The (extractedStocks) area should be replaced with the contents within extractedStocks below.
             - If the extractedDate is not "N/A" add &date=(extractedDate) to the end of the link. Only add date to link if there is date present, otherwise add nothing.
             - Respond in the format of: "apiLink: (apilink)"
-            - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT. DO NOT RESPOND WITH "Answer:". The only prefix before the link should be apiLink:
             
             extractedStocks: ${extractedStocks}.
             extractedDate: ${extractedDate}.
@@ -101,9 +100,10 @@ const apiKey = "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"
     return response.data;
   
     async function cleanLink(apiLink){
-      var cleanedLink = apiLink.replace("apiLink: ","");
-      return cleanedLink;
-    }
+        var cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
+        return cleanedLink;
+      }
+      
   }
 
   // summarizeData function
@@ -127,7 +127,7 @@ const apiKey = "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"
 
         Data: ${apiCallDataString}
         `,
-        max_tokens: 400,
+        max_tokens: 450,
         temperature: .5,
         stop: "/n",
     })

@@ -107,7 +107,6 @@ const apiKey = "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"
         - The to date (toDate) should be in the format YYYY-MM-DD and replaced with the second date found in the variable ${extractedTimeRange}.
         - The period should be determined by the length of the range. If the range is one year or longer, make it m. If it is 3 months or longer, make it w. if it is less, make it d.
         - Respond in the format of: "apiLink: (apilink)"
-        - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT. DO NOT RESPOND WITH "Answer:". The only prefix before the link should be apiLink:
         `,
         max_tokens: 2048,
         temperature: .3,
@@ -122,12 +121,12 @@ const apiKey = "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"
     return response.data;
 
     async function cleanLink(apiLink){
-      var cleanedLink = apiLink.replace("apiLink: ","");
+      var cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
       return cleanedLink;
-    }
+    }    
     }
     // summarizeData function
-    async function summarizeData(apiCallData, extractedStock, extractedTimeRange) {
+    async function summarizeData(apiCallData) {
     const apiCallDataString = JSON.stringify(apiCallData)
     const date = new Date();
     let day = date.getDate();

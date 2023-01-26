@@ -56,7 +56,6 @@ const apiKey = "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"
             apiLink: https://www.eodhistoricaldata.com/api/real-time/(stockName).US?api_token=63a2477acc2587.58203009&fmt=json
             - The stock name (stockName) should be replaced with the variable ${extractedStock}.
             - Respond in the format of: "apiLink: (apilink)"
-            - Do not respond with anything else. Do not repsond with "Answer:". Do not do it. DONT DO IT. DO NOT RESPOND WITH "Answer:". The only prefix before the link should be apiLink:
             `,
             max_tokens: 512,
             temperature: .5,
@@ -72,9 +71,9 @@ const apiKey = "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"
     return response.data;
   
     async function cleanLink(apiLink){
-      var cleanedLink = apiLink.replace("apiLink: ","");
+      var cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
       return cleanedLink;
-    }
+    }    
   }
   
   // summarizeData function
