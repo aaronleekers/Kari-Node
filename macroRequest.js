@@ -26,9 +26,9 @@ const apiKey = "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"
     var apiLink = await createApiLink(country, indicator);
     console.log(apiLink)
     var apiCallData = await apiCall(apiLink);
-    console.log(apiCallData);
     var summarizedData = await summarizeData(apiCallData);
     console.log(`Data Returned: ${summarizedData}`);
+    return summarizedData;
  
     // extractCountry function
     async function extractCountry(queryString) {
