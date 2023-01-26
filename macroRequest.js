@@ -6,9 +6,19 @@ const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
 const apiKey = "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"
 
 // What kind of questions this should be able to answer:
-// What is the current GDP of Croatia?
-// What is the unemployment rate of the US?
-// What is the real interest rate of Canada?
+// "What is the current interest rate for the US?"
+// "What is the total population of the US?"
+// "What is the annual population growth of the US?"
+// "What is the current inflation rate of the US?"
+// "What is the current CPI for the US?"
+// "What is the current GDP of the US?"
+// "What is the current GDP per capita of the US?"
+// "What is the GDP growth of the US this year?"
+// "What is the current debt to GDP ratio?"
+// "What is the current GNI?"
+// "What is the current GNI per capita?"
+// "What is the current fertility rate of the US?"
+// "What is the current unemployment rate?"
 
 // openAI auth
   const configuration = new Configuration({
@@ -68,9 +78,8 @@ const apiKey = "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"
          9. debt_percent_gdp - ("What is the current debt to GDP ratio?")
          10. gni_usd - ("What is the current GNI?")
          11. gni_per_capita_usd - ("What is the current GNI per capita?")
-         14. fertility_rate - ("What is the current fertility rate of the US?")
-         15. startup_procedurs_register - ("How many start ups have recently been registered in the US?")
-         16. unemployment_total_percent - ("What is the current unemployment rate?")
+         12. fertility_rate - ("What is the current fertility rate of the US?")
+         13. unemployment_total_percent - ("What is the current unemployment rate?")
          
          Query: ${queryString}
 

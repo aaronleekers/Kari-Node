@@ -20,7 +20,20 @@ const { realTimeRequest } = require('./realTimeRequest');
 // "What is the current price of SPY?"
 // "What are the latest price movements of AMZN?"
 // "What the current volume traded for SPY?"
-
+// "What is the current interest rate for the US?"
+// "What is the total population of the US?"
+// "What is the annual population growth of the US?"
+// "What is the current inflation rate of the US?"
+// "What is the current CPI for the US?"
+// "What is the current GDP of the US?"
+// "What is the current GDP per capita of the US?"
+// "What is the GDP growth of the US this year?"
+// "What is the current debt to GDP ratio?"
+// "What is the current GNI?"
+// "What is the current GNI per capita?"
+// "What is the current fertility rate of the US?"
+// "How many start ups have recently been registered in the US?"
+// "What is the current unemployment rate?"
 
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0";
 const apiKey = "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";
@@ -102,7 +115,7 @@ const requestFunctions = {
  3: fundamentalsStockRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 6
  4: fundamentalsCryptoRequest, // COMPLETE 
  5: bulkRequest, // COMPELTE
- 6: macroRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 5
+ 6: macroRequest, // COMPLETE 
 }
 
 // overall workflow. Decides which sub-workflow to execute, executes it, then returns the response.
