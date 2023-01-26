@@ -46,7 +46,7 @@ const apiKey = "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"
 
             queryString: ${queryString}
             `,
-            max_tokens: 3000,
+            max_tokens: 1024,
             stop: "/n"
         })
         return response.data.choices[0].text;
@@ -66,7 +66,7 @@ const apiKey = "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"
 
             queryString: ${queryString}
             `,
-            max_tokens: 3000,
+            max_tokens: 1024,
             stop: "/n"
         })
         return response.data.choices[0].text;
@@ -86,7 +86,7 @@ const apiKey = "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"
             extractedStocks: ${extractedStocks}.
             extractedDate: ${extractedDate}.
                        `,
-            max_tokens: 2048,
+            max_tokens: 1024,
             temperature: .3,
             stop: "/n",
         });
