@@ -102,10 +102,8 @@ const apiKey = "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"
     async function cleanLink(apiLink){
         var cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
         return cleanedLink;
-      }
-      
+      }    
   }
-
   // summarizeData function
   async function summarizeData(apiCallData) {
     const apiCallDataString = JSON.stringify(apiCallData)
@@ -127,6 +125,7 @@ const apiKey = "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"
 
         Data: ${apiCallDataString}
         `,
+        max_tokens: 1500,
         temperature: .5,
         stop: "/n",
     })
