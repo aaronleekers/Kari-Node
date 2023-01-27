@@ -104,8 +104,8 @@ const apiKey = "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"
      model: "text-davinci-003",
      prompt:
      `
-     Instructions: Replaces the variable stockName with the variable extractedStock.
-     Output: apiLink: https://www.eodhistoricaldata.com/api/fundamentals/(extractedStockName).US?api_token=63a2477acc2587.58203009&fmt=json&filter=Financials::(extractedStatement)::yearly
+     Instructions: Replace the variables extactedStatement and extractedStockName in the link with the passed in variables below.
+     Output: apiLink: https://www.eodhistoricaldata.com/api/fundamentals/extractedStockName.US?api_token=63a2477acc2587.58203009&fmt=json&filter=Financials::extractedStatement::yearly
      extractedStatement: ${extractedStatement}
      extractedStockName: ${extractedStockName}
      `,
