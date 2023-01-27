@@ -86,7 +86,7 @@ const apiKey = "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"
     prompt:
     `
      Instructions: Read the queryString, and extract the filing year being searched for. If there is no year, return 2021. 
-     Finally, output the extractedFilingYear like ("extractedFilingYear: (insert here))
+     Finally, output the year only.
 
      queryString: ${queryString}
     `,
@@ -116,17 +116,17 @@ const apiKey = "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"
   async function apiCall(apiLink, extractedFilingYear) {
     const cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
     const response = await axios.get(cleanedLink);
-    let filteredData = [];
-    const data = Object.values(response.data);
-    for (let i = 0; i < data.length; i++) {
-      const date = new Date(data[i].filing_date)
-      const year = date.getFullYear()
-      if (year === extractedFilingYear) {
-        filteredData.push(data[i]);
-      }
-    }
+    let filteredData;
+    Object.entries(response.data).forEach(([key, value]) => {
+        if (value.filing_date.includes(extractedFilingYear)) {
+            filteredData = value;
+        }
+    });
     return filteredData;
-  }
+}
+
+
+      
   
   
     // summarizeData function
