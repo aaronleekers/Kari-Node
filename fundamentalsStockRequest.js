@@ -31,7 +31,7 @@ const apiKey = "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"
  var apiLink = await createApiLink(extractedStockName, extractedStatement);
  console.log(apiLink);
  var apiCallData = await apiCall(apiLink, extractedFilingYear);
- console.log("extractedFilingYear:",extractedFilingYear, "apiCallData:",apiCallData);
+ console.log("extractedFilingYear:",extractedFilingYear);
  var cleanedApiCallData = await cleanApiCallData(extractedFilingYear, apiCallData);
  console.log("Data to be Summarized:",cleanedApiCallData);
  var summarizedData = await summarizeData(cleanedApiCallData);
