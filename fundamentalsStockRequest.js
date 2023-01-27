@@ -33,6 +33,7 @@ const apiKey = "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"
  var apiCallData = await apiCall(apiLink, extractedFilingYear);
  console.log("extractedFilingYear:",extractedFilingYear, "apiCallData:",apiCallData);
  var cleanedApiCallData = await cleanApiCallData(extractedFilingYear, apiCallData);
+ console.log("Data to be Summarized:",cleanedApiCallData);
  var summarizedData = await summarizeData(cleanedApiCallData);
  return summarizedData;
 
