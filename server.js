@@ -118,7 +118,7 @@ async function qualifyRequestType(queryString) {
 const requestFunctions = {
  1: eodRequest, // COMPLETE
  2: realTimeRequest, // COMPLETE 
- 3: fundamentalsStockRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 6
+ 3: fundamentalsStockRequest, // COMPLETE 
  4: fundamentalsCryptoRequest, // COMPLETE 
  5: bulkRequest, // COMPELTE
  6: macroRequest, // COMPLETE 
