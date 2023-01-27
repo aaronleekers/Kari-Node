@@ -110,17 +110,20 @@ const apiKey = "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"
    })
    return response.data.choices[0].text; 
   }
-  async function apiCall(apiLink, filingYear) {
+  async function apiCall(apiLink, extractedFilingYear) {
     const cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
     const response = await axios.get(cleanedLink);
     let filteredData = [];
     for (let item of response.data) {
-      if (item.filing_year === filingYear) {
+      const date = new Date(item.filing_date)
+      const year = date.getFullYear()
+      if (year === extractedFilingYear) {
         filteredData.push(item);
       }
     }
     return filteredData;
   }
+  
   
     // summarizeData function
     async function summarizeData(apiCallData, queryString) {
