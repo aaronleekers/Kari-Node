@@ -40,7 +40,7 @@ const apiKey = "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"
      prompt:
      `
      Please extract the company name from the following sentence, 
-     convert it to a stock ticker format, 
+     convert it to a   stock ticker format, 
      and format the output as "stockName: (converted stock ticker)"
      For example: "Apple" to "stockName: AAPL" or "Ford" to "stockName: F"
      Sentence: ${queryString}
@@ -124,16 +124,18 @@ const apiKey = "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"
     }
 
     async function cleanData(apiCallData, extractedFilingYear) {
-      let cleanedApiCallData = {};
-      for (const year in apiCallData) {
-          if (year === extractedFilingYear) {
-              for (const prop in apiCallData[year]) {
-                  cleanedApiCallData = { ...cleanedApiCallData, [prop]: apiCallData[year][prop] };
+      let cleanedApiCallData;
+      for (const key in apiCallData) {
+          if (apiCallData.hasOwnProperty(key)) {
+              if (key === extractedFilingYear) {
+                  cleanedApiCallData = apiCallData[key];
+                  break;
               }
           }
       }
       return cleanedApiCallData;
   }
+  
   
     
 
