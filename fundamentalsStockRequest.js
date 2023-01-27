@@ -25,7 +25,7 @@ const apiKey = "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"
  var extractedStockName = await extractStockName(queryString);
  var extractedStatement = await extractStatement(queryString);
  var extractedFilingYear = await extractFilingYear(queryString);
- console.log(extractedStockName, extractedFilters)
+ console.log(extractedStockName, extractedStatement)
  var apiLink = await createApiLink(extractedStockName, extractedStatement);
  console.log(apiLink);
  var apiCallData = await apiCall(apiLink);
