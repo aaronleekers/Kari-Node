@@ -7,8 +7,8 @@ const { fundamentalsCryptoRequest } = require('./fundamentalsCryptoRequest');
 const { macroRequest } = require('./macroRequest');
 const { realTimeRequest } = require('./realTimeRequest');
 
-// What kind of questions this API can serve:
-// Compare the stocks TSLA, AAPL, MCD, SPY, and MSFT.
+
+// Compare the stocks TSLA, AAPL, MCD
 // Compare Ford, General Motors, and Tesla's price performance on January 25, 2023.
 // Compare The S&P 500 ETF, Coca Cola, and McDonald's price performance on January 6, 2021.
 // What are the fundamentals of bitcoin?
@@ -32,7 +32,6 @@ const { realTimeRequest } = require('./realTimeRequest');
 // "What is the current GNI?"
 // "What is the current GNI per capita?"
 // "What is the current fertility rate of the US?"
-// "How many start ups have recently been registered in the US?"
 // "What is the current unemployment rate?"
 
 const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0";
@@ -124,9 +123,7 @@ async function api_search(queryString) {
   const requestType = await qualifyRequestType(queryString);
   const intRequest = parseInt(requestType);
   console.log("Request Type:",intRequest);
-  console.log(typeof intRequest);
   const requestOutput = await requestFunctions[intRequest](queryString);
-  console.log(requestOutput);
   return requestOutput;
 }
 
