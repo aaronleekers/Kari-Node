@@ -135,7 +135,7 @@ const apiKey = "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"
   }
   
     
-    // summarizeData function
+    // summarsizeData function
     async function summarizeData(cleanedApiCallData, queryString) {
       const date = new Date();
       let day = date.getDate();
