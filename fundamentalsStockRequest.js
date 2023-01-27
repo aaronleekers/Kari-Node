@@ -26,15 +26,14 @@ const apiKey = "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"
  // Stock Fundamentals - Not Complete & Nuanced - Not Tested
  var extractedStockName = await extractStockName(queryString);
  var extractedStatement = await extractStatement(queryString);
- var extractedFilingYear = await extractFilingYear(queryString);
+ // var extractedFilingYear = await extractFilingYear(queryString); // waiting till figure out regex issue.
  console.log(extractedStockName, extractedStatement);
  var apiLink = await createApiLink(extractedStockName, extractedStatement);
  console.log(apiLink);
- var apiCallData = await apiCall(apiLink, extractedFilingYear);
- console.log("extractedFilingYear:",extractedFilingYear);
- var cleanedApiCallData = await cleanApiCallData(extractedFilingYear, apiCallData);
- console.log("Data to be Summarized:",cleanedApiCallData);
- var summarizedData = await summarizeData(cleanedApiCallData);
+ var apiCallData = await apiCall(apiLink); 
+ var shortenedApiCallData = await shortenApiCallData(apiCallData);
+ console.log("Data to be Summarized:",shortenedApiCallData);
+ var summarizedData = await summarizeData(shortenedApiCallData, queryString);
  return summarizedData;
 
  async function extractStockName(queryString){
@@ -126,18 +125,27 @@ const apiKey = "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"
       return cleanedLink;
     }    
   }
-// Take a break - last left on this shit returning null. Check ChatGPT for modifications
-  async function cleanApiCallData(apiCallData, extractedFilingYear) {
-    const apiCallDataString = JSON.stringify(apiCallData);
-    const lastExtractedFilingYear = extractedFilingYear - 1
-    const regex = new RegExp(`"filing_date": "${extractedFilingYear}.*?(?="filing_date": "${lastExtractedFilingYear}|$)`, 'g');
-    const cleanedApiCallData = apiCallDataString.match(regex);
-    return cleanedApiCallData;
-  }
+  // archived until I can figure it out - this would add in the functionality to search for past statements.
+ // async function cleanApiCallData(apiCallData, extractedFilingYear) {
+  //  const apiCallDataString = JSON.stringify(apiCallData);
+  //  const lastExtractedFilingYear = extractedFilingYear - 1
+  //  const regex = new RegExp(`"filing_date": "${extractedFilingYear}.*?(?="filing_date": "${lastExtractedFilingYear}|$)`, 'g');
+   // const cleanedApiCallData = apiCallDataString.match(regex);
+  //  return cleanedApiCallData;
+  //}
   
+
+  // new function its lazy tho - only allows for current statements.
+  async function shortenApiCallData(apiCallData) {
+    let stringifiedData = JSON.stringify(apiCallData);
+    if(stringifiedData.length > 3000) {
+      stringifiedData = stringifiedData.slice(0, 3000) + "...";
+    }
+    return stringifiedData;
+  }
     
     // summarsizeData function
-    async function summarizeData(cleanedApiCallData, queryString) {
+    async function summarizeData(shortenedApiCallData, queryString) {
       const date = new Date();
       let day = date.getDate();
       let month = date.getMonth() + 1;
@@ -154,9 +162,9 @@ const apiKey = "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"
           Tip: If there is no data in the string, don't just make up data, return the fact that the data is empty.
   
           Question: ${queryString}
-          Data: ${cleanedApiCallData}
+          Data: ${shortenedApiCallData}
           `,
-          max_tokens: 256,
+          max_tokens: 512,
           temperature: .5,
           stop: "/n",
       })
