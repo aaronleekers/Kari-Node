@@ -29,9 +29,8 @@ const apiKey = "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"
  var apiLink = await createApiLink(extractedStockName, extractedStatement);
  console.log(apiLink);
  var apiCallData = await apiCall(apiLink);
- var cleanedData = await cleanData(apiCallData, extractedFilingYear);
- console.log(extractedFilingYear, cleanedData);
- var summarizedData = await summarizeData(cleanedData);
+ console.log(extractedFilingYear, apiCallData);
+ var summarizedData = await summarizeData(apiCallData);
  return summarizedData;
 
  async function extractStockName(queryString){
@@ -112,36 +111,16 @@ const apiKey = "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"
    return response.data.choices[0].text; 
   }
     // apiCall function
-    async function apiCall(apiLink) {
-      const cleanedLink = await cleanLink(apiLink);
+    async function apiCall(apiLink, filingYear) {
+      const cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
       const response = await axios.get(cleanedLink);
-      return response.data;
-    
-      async function cleanLink(apiLink){
-          var cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
-          return cleanedLink;
-        }    
+      const filteredData = response.data.filter(item => item.filing_year === filingYear);
+      return filteredData;
     }
-
-    async function cleanData(apiCallData, extractedFilingYear) {
-      let cleanedApiCallData;
-      for (const key in apiCallData) {
-          if (apiCallData.hasOwnProperty(key)) {
-              if (key === extractedFilingYear) {
-                  cleanedApiCallData = apiCallData[key];
-                  break;
-              }
-          }
-      }
-      return cleanedApiCallData;
-  }
-  
-  
     
-
     // summarizeData function
-    async function summarizeData(cleanedApiCallData, queryString) {
-      const apiCallDataString = JSON.stringify(cleanedApiCallData)
+    async function summarizeData(apiCallData, queryString) {
+      const apiCallDataString = JSON.stringify(apiCallData)
       const date = new Date();
       let day = date.getDate();
       let month = date.getMonth() + 1;
