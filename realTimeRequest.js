@@ -27,7 +27,6 @@ const apiKey = "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"
     console.log("Making API call now!");
     const apiCallData = await apiCall(apiLink);
     const summarizedData = await summarizeData(apiCallData);
-    console.log(`Data Returned: ${summarizedData}`);
     return summarizedData;
     // extractInfo function
     async function extractStock(queryString) {

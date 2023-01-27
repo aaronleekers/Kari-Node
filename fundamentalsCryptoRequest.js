@@ -26,7 +26,6 @@ const apiKey = "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"
   console.log(apiLink)
   var apiCallData = await apiCall(apiLink);
   var summarizedData = await summarizeData(apiCallData);
-  console.log(`Data returned: ${summarizedData}`);
   return summarizedData;
 
   // extractCrypto function
