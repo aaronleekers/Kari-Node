@@ -27,7 +27,7 @@ const apiKey = "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"
  var extractedStockName = await extractStockName(queryString);
  var extractedStatement = await extractStatement(queryString);
  var extractedFilingYear = await extractFilingYear(queryString);
- console.log(extractedStockName, extractedStatement)
+ console.log(extractedStockName, extractedStatement);
  var apiLink = await createApiLink(extractedStockName, extractedStatement);
  console.log(apiLink);
  var apiCallData = await apiCall(apiLink, extractedFilingYear);
@@ -43,7 +43,7 @@ const apiKey = "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"
      prompt:
      `
      Please extract the company name from the following sentence, 
-     convert it to a   stock ticker format, 
+     convert it to a stock ticker format, 
      and format the output as "stockName: (converted stock ticker)"
      For example: "Apple" to "stockName: AAPL" or "Ford" to "stockName: F"
      Sentence: ${queryString}
@@ -129,25 +129,11 @@ const apiKey = "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"
 
   async function cleanApiCallData(apiCallData, extractedFilingYear) {
     const apiCallDataString = JSON.stringify(apiCallData);
-    let cleanedApiCallData = "";
-    let startIndex = 0;
-    while (true) {
-      // look for the text "filing_date": "${year}, followed by whatever"
-      const filingDateIndex = apiCallDataString.indexOf(`"filing_date": "${extractedFilingYear}`, startIndex);
-      if (filingDateIndex === -1) {
-        break;
-      }
-      //look for the text "filing_date": "${year-1}, followed by whatever"
-      const nextFilingDateIndex = apiCallDataString.indexOf(`"filing_date": "${extractedFilingYear-1}`, startIndex);
-      if (nextFilingDateIndex === -1) {
-        cleanedApiCallData += apiCallDataString.slice(filingDateIndex);
-        break;
-      }
-      cleanedApiCallData += apiCallDataString.slice(filingDateIndex, nextFilingDateIndex);
-      startIndex = nextFilingDateIndex;
-    }
+    const regex = new RegExp(`"filing_date": "${extractedFilingYear}.*?(?="filing_date": "${extractedFilingYear-1}|$)`, 'g');
+    const cleanedApiCallData = apiCallDataString.match(regex);
     return cleanedApiCallData;
   }
+  
     
     // summarizeData function
     async function summarizeData(cleanedApiCallData, queryString) {
