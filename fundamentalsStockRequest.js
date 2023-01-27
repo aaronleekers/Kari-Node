@@ -114,15 +114,16 @@ const apiKey = "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"
     const cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
     const response = await axios.get(cleanedLink);
     let filteredData = [];
-    for (let item of response.data) {
-      const date = new Date(item.filing_date)
+    for (let i = 0; i < response.data.length; i++) {
+      const date = new Date(response.data[i].filing_date)
       const year = date.getFullYear()
       if (year === extractedFilingYear) {
-        filteredData.push(item);
+        filteredData.push(response.data[i]);
       }
     }
     return filteredData;
   }
+  
   
   
     // summarizeData function
