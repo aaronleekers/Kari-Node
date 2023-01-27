@@ -126,10 +126,11 @@ const apiKey = "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"
       return cleanedLink;
     }    
   }
-
+// Take a break - last left on this shit returning null. Check ChatGPT for modifications
   async function cleanApiCallData(apiCallData, extractedFilingYear) {
     const apiCallDataString = JSON.stringify(apiCallData);
-    const regex = new RegExp(`"filing_date": "${extractedFilingYear}.*?(?="filing_date": "${extractedFilingYear-1}|$)`, 'g');
+    const lastExtractedFilingYear = extractedFilingYear - 1
+    const regex = new RegExp(`"filing_date": "${extractedFilingYear}.*?(?="filing_date": "${lastExtractedFilingYear}|$)`, 'g');
     const cleanedApiCallData = apiCallDataString.match(regex);
     return cleanedApiCallData;
   }
