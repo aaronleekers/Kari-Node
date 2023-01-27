@@ -20,6 +20,8 @@ const apiKey = "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"
     apiKey: apiKey,
 });
   const openai = new OpenAIApi(configuration);
+
+
   async function fundamentalsStockRequest(queryString) {
  // Stock Fundamentals - Not Complete & Nuanced - Not Tested
  var extractedStockName = await extractStockName(queryString);
@@ -29,7 +31,7 @@ const apiKey = "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"
  var apiLink = await createApiLink(extractedStockName, extractedStatement);
  console.log(apiLink);
  var apiCallData = await apiCall(apiLink, extractedFilingYear);
- console.log(extractedFilingYear, apiCallData);
+ console.log("extractedFilingYear:",extractedFilingYear, "apiCallData:",apiCallData);
  var summarizedData = await summarizeData(apiCallData);
  return summarizedData;
 
@@ -110,21 +112,22 @@ const apiKey = "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"
    })
    return response.data.choices[0].text; 
   }
+
   async function apiCall(apiLink, extractedFilingYear) {
     const cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
+    const cleanedFilingYear = "2021";
+
     const response = await axios.get(cleanedLink);
     let filteredData = [];
     for (let i = 0; i < response.data.length; i++) {
       const date = new Date(response.data[i].filing_date)
       const year = date.getFullYear()
-      if (year === extractedFilingYear) {
+      if (year === cleanedFilingYear) {
         filteredData.push(response.data[i]);
       }
     }
     return filteredData;
   }
-  
-  
   
     // summarizeData function
     async function summarizeData(apiCallData, queryString) {
