@@ -28,7 +28,7 @@ const apiKey = "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"
  console.log(extractedStockName, extractedStatement)
  var apiLink = await createApiLink(extractedStockName, extractedStatement);
  console.log(apiLink);
- var apiCallData = await apiCall(apiLink);
+ var apiCallData = await apiCall(apiLink, filingYear);
  console.log(extractedFilingYear, apiCallData);
  var summarizedData = await summarizeData(apiCallData);
  return summarizedData;
@@ -110,14 +110,18 @@ const apiKey = "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"
    })
    return response.data.choices[0].text; 
   }
-    // apiCall function
-    async function apiCall(apiLink, filingYear) {
-      const cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
-      const response = await axios.get(cleanedLink);
-      const filteredData = response.data.filter(item => item.filing_year === filingYear);
-      return filteredData;
+  async function apiCall(apiLink, filingYear) {
+    const cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
+    const response = await axios.get(cleanedLink);
+    let filteredData = [];
+    for (let item of response.data) {
+      if (item.filing_year === filingYear) {
+        filteredData.push(item);
+      }
     }
-    
+    return filteredData;
+  }
+  
     // summarizeData function
     async function summarizeData(apiCallData, queryString) {
       const apiCallDataString = JSON.stringify(apiCallData)
