@@ -32,7 +32,8 @@ const apiKey = "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"
  console.log(apiLink);
  var apiCallData = await apiCall(apiLink, extractedFilingYear);
  console.log("extractedFilingYear:",extractedFilingYear, "apiCallData:",apiCallData);
- var summarizedData = await summarizeData(apiCallData);
+ var cleanedApiCallData = await cleanApiCallData(extractedFilingYear, apiCallData);
+ var summarizedData = await summarizeData(cleanedApiCallData);
  return summarizedData;
 
  async function extractStockName(queryString){
@@ -85,7 +86,7 @@ const apiKey = "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"
     model: "text-davinci-003",
     prompt:
     `
-     Instructions: Read the queryString, and extract the filing year being searched for. If there is no year, return 2021. 
+     Instructions: Read the queryString, and extract the filing year being searched for. If there is no year, return 2022. 
      Finally, output the year only.
 
      queryString: ${queryString}
@@ -113,25 +114,42 @@ const apiKey = "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"
    return response.data.choices[0].text; 
   }
 
-  async function apiCall(apiLink, extractedFilingYear) {
-    const cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
+   // apiCall function
+   async function apiCall(apiLink) {
+    const cleanedLink = await cleanLink(apiLink);
     const response = await axios.get(cleanedLink);
-    let filteredData;
-    Object.entries(response.data).forEach(([key, value]) => {
-        if (value.filing_date.includes(extractedFilingYear)) {
-            filteredData = value;
-        }
-    });
-    return filteredData;
-}
-
-
-      
+    return response.data;
   
-  
+    async function cleanLink(apiLink){
+      var cleanedLink = apiLink.replace(/.*(https:\/\/)/, "https://");
+      return cleanedLink;
+    }    
+  }
+
+  async function cleanApiCallData(apiCallData, extractedFilingYear) {
+    const apiCallDataString = JSON.stringify(apiCallData);
+    let cleanedApiCallData = "";
+    let startIndex = 0;
+    while (true) {
+      // look for the text "filing_date": "${year}, followed by whatever"
+      const filingDateIndex = apiCallDataString.indexOf(`"filing_date": "${extractedFilingYear}`, startIndex);
+      if (filingDateIndex === -1) {
+        break;
+      }
+      //look for the text "filing_date": "${year-1}, followed by whatever"
+      const nextFilingDateIndex = apiCallDataString.indexOf(`"filing_date": "${extractedFilingYear-1}`, startIndex);
+      if (nextFilingDateIndex === -1) {
+        cleanedApiCallData += apiCallDataString.slice(filingDateIndex);
+        break;
+      }
+      cleanedApiCallData += apiCallDataString.slice(filingDateIndex, nextFilingDateIndex);
+      startIndex = nextFilingDateIndex;
+    }
+    return cleanedApiCallData;
+  }
+    
     // summarizeData function
-    async function summarizeData(apiCallData, queryString) {
-      const apiCallDataString = JSON.stringify(apiCallData)
+    async function summarizeData(cleanedApiCallData, queryString) {
       const date = new Date();
       let day = date.getDate();
       let month = date.getMonth() + 1;
@@ -148,7 +166,7 @@ const apiKey = "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"
           Tip: If there is no data in the string, don't just make up data, return the fact that the data is empty.
   
           Question: ${queryString}
-          Data: ${apiCallDataString}
+          Data: ${cleanedApiCallData}
           `,
           max_tokens: 256,
           temperature: .5,
