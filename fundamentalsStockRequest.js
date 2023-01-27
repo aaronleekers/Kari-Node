@@ -10,9 +10,9 @@ const apiKey = "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"
 // Get me the latest income statement for AAPL
 // Get me the latest cash flow statement for AAPL
 // Get me the latest statement of shareholders equity for AAPL
-// Get me the balance sheet for AAPL for Q1 2019. 
-// Get me the income statement for AAPL for Q1 2019. 
-// Get me the cash flow statement for AAPL for Q1 2019. 
+// How much did Apple earn this year?
+// How much cash does AAPL have on its balance sheet?
+// How much cash flow came from investing activities for AAPL 
 
 // openAI auth
   const configuration = new Configuration({
@@ -69,11 +69,9 @@ const apiKey = "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"
       (I: "Get me the Balance Sheet for Apple in 2020.", O: "extractedStatement: Balance_Sheet")
       (I: "Get me the Cash Flow Statement for Apple in 2020.", O: "extractedStatement: Cash_Flow")
       (I: "How much did Apple earn in 2020?", O: "extractedStatement: Income_Statement")
-      (I: "How much cash does AAPL have on its balance sheet?", O: "extractedStatement: Income_Statement")
+      (I: "How much cash does AAPL have on its balance sheet?", O: "extractedStatement: Balance_Sheet")
       (I: "How much cash flow came from investing activities for AAPL in 2020?.", O: "extractedStatement: Cash_Flow")
 
-      Balance_Sheet
-      Cash_Flow_
      `,
      max_tokens: 1024,
      stop: "/n"
@@ -81,21 +79,21 @@ const apiKey = "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"
    return response.data.choices[0].text;
  }
 
- async function extractFilingYear(queryString){
-  const response = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt:
-    `
-     Instructions: Read the queryString, and extract the filing year being searched for. If there is no year, return 2022. 
-     Finally, output the year only.
-
-     queryString: ${queryString}
-    `,
-    max_tokens: 1024,
-    stop: "/n"
-  })
-  return response.data.choices[0].text;
-}
+ //async function extractFilingYear(queryString){
+//  const response = await openai.createCompletion({
+ //   model: "text-davinci-003",
+ //   prompt:
+ //   `
+  //   Instructions: Read the queryString, and extract the filing year being searched for. If there is no year, return 2022. 
+  //   Finally, output the year only.
+//
+ //    queryString: ${queryString}
+ //   `,
+ //   max_tokens: 1024,
+ //   stop: "/n"
+ // })
+  //return response.data.choices[0].text;
+//}
 
 
  async function createApiLink(extractedStockName, extractedStatement) {
