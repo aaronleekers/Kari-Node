@@ -123,20 +123,18 @@ const apiKey = "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"
         }    
     }
 
-    // cleanData function
     async function cleanData(apiCallData, extractedFilingYear) {
       let cleanedApiCallData = {};
-      let dataArray = Object.values(apiCallData);
-      for (let data of dataArray) {
-        let filingYear = data.filing_date.substring(0, 4);
-        if (filingYear === extractedFilingYear) {
-          cleanedApiCallData[data.date] = data;
-        } else if (Object.keys(cleanedApiCallData).length > 0) {
-          return cleanedApiCallData;
-        }
+      for (const year in apiCallData) {
+          if (year === extractedFilingYear) {
+              for (const prop in apiCallData[year]) {
+                  cleanedApiCallData = { ...cleanedApiCallData, [prop]: apiCallData[year][prop] };
+              }
+          }
       }
       return cleanedApiCallData;
-    }
+  }
+  
     
 
     // summarizeData function
