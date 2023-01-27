@@ -65,11 +65,11 @@ const apiKey = "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"
 
       Example Inputs & Outputs:
 
-      (I: "Get me the Income statement for Apple in 2020.", O: "extractedStatement: Income_statement")
+      (I: "Get me the Income statement for Apple in 2020.", O: "extractedStatement: Income_Statement")
       (I: "Get me the Balance Sheet for Apple in 2020.", O: "extractedStatement: Balance_Sheet")
       (I: "Get me the Cash Flow Statement for Apple in 2020.", O: "extractedStatement: Cash_Flow")
-      (I: "How much did Apple earn in 2020?", O: "extractedStatement: Income_statement")
-      (I: "How much cash does AAPL have on its balance sheet?", O: "extractedStatement: Income_statement")
+      (I: "How much did Apple earn in 2020?", O: "extractedStatement: Income_Statement")
+      (I: "How much cash does AAPL have on its balance sheet?", O: "extractedStatement: Income_Statement")
       (I: "How much cash flow came from investing activities for AAPL in 2020?.", O: "extractedStatement: Cash_Flow")
 
       Balance_Sheet
