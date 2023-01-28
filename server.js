@@ -41,8 +41,8 @@ const { realTimeRequest } = require('./realTimeRequest');
 // How much cash does AAPL have on its balance sheet?
 // How much cash flow came from investing activities for AAPL 
 
-const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0";
-const apiKey = "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";
+const orgId = process.env.ORG_ID;
+const apiKey = process.env.API_KEY;
 
 // openAI auth
   const configuration = new Configuration({
