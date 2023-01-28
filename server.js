@@ -53,6 +53,11 @@ const apiKey = "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";
 
 const cors = require('cors');
 
+// server setting Cors
+server.use(cors({
+  origin: 'https://www.chat.openai.com/chat'
+}));
+
 // make Server
   const server = http.createServer((req, res) => {
     //Handle CORS preflight request
@@ -62,7 +67,6 @@ const cors = require('cors');
         handleRequest(req, res);
     }
 });
-
 
 
 // main handleRequest function, takes in request body and runs it through api_search
@@ -87,10 +91,7 @@ async function handleRequest(req, res) {
     }
 }
 
-// server setting Cors
-app.use(cors({
-  origin: 'https://www.chat.openai.com/chat'
-}));
+
 // server listening for requests
 server.listen(3000, '0.0.0.0', () => {
   console.log('Server running at http://0.0.0.0:3000');
