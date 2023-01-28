@@ -2,8 +2,8 @@ const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 
   
-const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
-const apiKey = "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"
+const orgId = process.env.ORG_ID;
+const apiKey = process.env.API_KEY;
 
 // This should be able to answer questions like:
 // Compare the stocks TSLA, AAPL, MCD, SPY, and MSFT.

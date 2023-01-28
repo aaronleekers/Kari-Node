@@ -1,8 +1,8 @@
 const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 
-const orgId = "org-9HfRDuLSYdMqot8sxBpkd5A0"
-const apiKey = "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"
+const orgId = process.env.ORG_ID;
+const apiKey = process.env.API_KEY;
 
 // KIND OF QUESTIONS THIS SHOULD BE ABLE TO ANSWER
 // "What is the current price of SPY?"
