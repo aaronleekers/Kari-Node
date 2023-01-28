@@ -88,7 +88,7 @@ async function handleRequest(req, res) {
 }
 
 // server setting Cors
-server.use(cors({
+app.use(cors({
   origin: 'https://www.chat.openai.com/chat'
 }));
 // server listening for requests
