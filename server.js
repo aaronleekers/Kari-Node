@@ -51,14 +51,11 @@ const apiKey = "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";
 });
   const openai = new OpenAIApi(configuration);
 // set Cors Headers
-  async function setCorsHeaders(req, res) {
-      const allowedOrigin = 'https://chat.openai.com';
-      const origin = req.headers.origin;
-      if (origin === allowedOrigin) {
-          res.setHeader("Access-Control-Allow-Origin", origin);
-      }
+  async function setCorsHeaders(res) {
+      res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 }
+
 // make Server
   const server = http.createServer((req, res) => {
     //Handle CORS preflight request
