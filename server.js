@@ -44,7 +44,7 @@ const { realTimeRequest } = require('./realTimeRequest');
 const orgId = process.env.ORG_ID;
 const apiKey = process.env.API_KEY;
 
-// openAI auth
+// openAI auths
   const configuration = new Configuration({
     orgId: orgId,
     apiKey: apiKey,
