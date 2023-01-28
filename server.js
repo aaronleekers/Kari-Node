@@ -53,19 +53,8 @@ const apiKey = "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";
 
 const cors = require('cors');
 
-// server setting Cors
-server.use(cors({
-  origin: 'https://www.chat.openai.com/chat'
-}));
-
-// make Server
-  const server = http.createServer((req, res) => {
-    //Handle CORS preflight request
-    if(req.method === 'OPTIONS') {
-      res.end();
-    } else {
-        handleRequest(req, res);
-    }
+const server = http.createServer(cors(), (req, res) => {
+    handleRequest(req, res);
 });
 
 
