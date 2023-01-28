@@ -51,11 +51,19 @@ const apiKey = "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";
 });
   const openai = new OpenAIApi(configuration);
 
-const cors = require('cors');
 
-const server = http.createServer(cors(), (req, res) => {
-    handleRequest(req, res);
+const server = http.createServer((req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://www.chat.openai.com/chat');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  //Handle CORS preflight request
+  if(req.method === 'OPTIONS') {
+    res.end();
+  } else {
+      handleRequest(req, res);
+  }
 });
+
 
 
 // main handleRequest function, takes in request body and runs it through api_search
