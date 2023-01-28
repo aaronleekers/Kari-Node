@@ -51,12 +51,14 @@ const apiKey = "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";
 });
   const openai = new OpenAIApi(configuration);
 // set Cors Headers
-  async function setCorsHeaders(res) {
-      res.setHeader("Access-Control-Allow-Origin", "*");
+  async function setCorsHeaders(req, res) {
+      const allowedOrigin = 'https://chat.openai.com';
+      const origin = req.headers.origin;
+      if (origin === allowedOrigin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+      }
       res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-      res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 }
-
 // make Server
   const server = http.createServer((req, res) => {
     //Handle CORS preflight request
@@ -116,7 +118,7 @@ async function qualifyRequestType(queryString) {
 const requestFunctions = {
  1: eodRequest, // COMPLETE
  2: realTimeRequest, // COMPLETE 
- 3: fundamentalsStockRequest, // COMPLETE 
+ 3: fundamentalsStockRequest, // NOT COMPLETE // TO BE CHECKED OFF AFTER 6
  4: fundamentalsCryptoRequest, // COMPLETE 
  5: bulkRequest, // COMPELTE
  6: macroRequest, // COMPLETE 
