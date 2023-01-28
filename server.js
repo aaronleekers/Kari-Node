@@ -50,7 +50,7 @@ const apiKey = "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";
     apiKey: apiKey,
 });
   const openai = new OpenAIApi(configuration);
-// set Cors Headers
+// set Cors Headers(s)
   function setCorsHeaders(res) {
       const allowedOrigin = 'https://chat.openai.com';
       res.set("Access-Control-Allow-Origin", allowedOrigin);
