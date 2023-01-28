@@ -66,26 +66,30 @@ const server = http.createServer((req, res) => {
 
 
 
-// main handleRequest function, takes in request body and runs it through api_search
 async function handleRequest(req, res) {
-    if (req.method === 'POST' && req.url === '/api_search') {
-        let body = '';
-        req.on('data', (chunk) => {
-        body += chunk.toString();
-        });
-        req.on('end', async () => {
-          const parsedBody = JSON.parse(body);
-          const queryString = JSON.stringify(parsedBody.input.query);
-          const requestOutput = await api_search(queryString);
-          res.end(JSON.stringify(requestOutput));       
-        });
-    } else if (req.url === '/') {
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end('Hello, World!');
-    } else {
-        res.writeHead(404);
-        res.end();
-    }
+  if (req.method === 'POST' && req.url === '/api_search') {
+      let body = '';
+      req.on('data', (chunk) => {
+          body += chunk.toString();
+      });
+      req.on('end', async () => {
+          try {
+              const parsedBody = JSON.parse(body);
+              const queryString = JSON.stringify(parsedBody.input.query);
+              const requestOutput = await api_search(queryString);
+              res.end(JSON.stringify(requestOutput)); 
+          } catch (err) {
+              res.writeHead(500, { 'Content-Type': 'text/plain' });
+              res.end('An error occurred while processing the request: ' + err.message);
+          }
+      });
+  } else if (req.url === '/') {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('Hello, World!');
+  } else {
+      res.writeHead(404);
+      res.end();
+  }
 }
 
 
