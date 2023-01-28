@@ -50,23 +50,21 @@ const apiKey = "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";
     apiKey: apiKey,
 });
   const openai = new OpenAIApi(configuration);
-// set Cors Headers(s)
-  function setCorsHeaders(res) {
-      const allowedOrigin = 'https://chat.openai.com';
-      res.set("Access-Control-Allow-Origin", allowedOrigin);
-      res.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-}
+
+const cors = require('cors');
+
 // make Server
   const server = http.createServer((req, res) => {
     //Handle CORS preflight request
     if(req.method === 'OPTIONS') {
-      setCorsHeaders(req, res);
       res.end();
     } else {
-        setCorsHeaders(req, res);
         handleRequest(req, res);
     }
 });
+
+
+
 // main handleRequest function, takes in request body and runs it through api_search
 async function handleRequest(req, res) {
     if (req.method === 'POST' && req.url === '/api_search') {
@@ -88,6 +86,11 @@ async function handleRequest(req, res) {
         res.end();
     }
 }
+
+// server setting Cors
+server.use(cors({
+  origin: 'https://www.chat.openai.com/chat'
+}));
 // server listening for requests
 server.listen(3000, '0.0.0.0', () => {
   console.log('Server running at http://0.0.0.0:3000');
